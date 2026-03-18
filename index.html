@@ -501,74 +501,7 @@ function exportPaymentsPDF(){
   });
   downloadFile('tolem-kyrys-shygys.pdf', text, 'application/pdf');
 }
-// ===== FIX: missing WhatsApp functions =====
 
-function sendNoticeWhatsApp(){
-  alert("WhatsApp функциясы кейін қосылады");
-}
-
-function sendCrmWhatsApp(){
-  alert("CRM WhatsApp функциясы кейін қосылады");
-}
-  function openWhatsApp(phone, text){
-  const cleaned = String(phone || '').replace(/[^\d]/g, '');
-  if(!cleaned){
-    alert('Телефон нөмірі жоқ');
-    return;
-  }
-  window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')}`, '_blank');
-}
-
-function sendCrmWhatsApp() {
-  const phone = document.getElementById('crmMsgPhone')?.value?.trim();
-  const name = document.getElementById('crmMsgName')?.value?.trim();
-  const body = document.getElementById('crmMsgBody')?.value?.trim();
-
-  if (!phone) {
-    alert('Клиент номерін толтыр');
-    return;
-  }
-
-  let text = 'Сәлеметсіз бе';
-
-  if (name) {
-    text += ', ' + name;
-  }
-
-  text += '! ' + (body || '');
-
-  openWhatsApp(phone, text);
-}
-function sendNoticeWhatsApp(){
-  const studentId = document.getElementById('noticeStudent')?.value;
-  const type = document.getElementById('noticeType')?.value;
-  const customBody = document.getElementById('noticeBody')?.value?.trim();
-
-  if(!studentId){
-    alert('Оқушыны таңда');
-    return;
-  }
-
-  const st = data.students.find(x => x.id === studentId);
-  if(!st){
-    alert('Оқушы табылмады');
-    return;
-  }
-
-  const amount = Number(st.debt_amount||  st.monthly_fee||  0);
-
-  let text = customBody;
-
-  if(!text){
-    if(type === 'Қарыз'){
-      text = `Сәлеметсіз бе! ${st.full_name} бойынша қарыз: ${money(amount)}. Төлеу күні: ${st.next_payment_date || '—'}.`;
-    } else {
-      text = Сәлеметсіз бе! ${st.full_name} үшін төлем уақыты келді. Сома: ${money(amount)}. Күні: ${st.next_payment_date || '—'}.;
-    }
-  }
-
-  openWhatsApp(st.phone, text);
-}
 </script>
 </body>
 </html>
