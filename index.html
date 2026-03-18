@@ -503,21 +503,24 @@ function exportPaymentsPDF(){
 }
 function openWhatsApp(phone, text) {
   const cleaned = String(phone || '').replace(/[^\d]/g, '');
+
   if (!cleaned) {
     alert('Телефон нөмірі жоқ');
     return;
   }
 
-  window.open(
-    https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')},
-    '_blank'
-  );
+  const url = https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')};
+  window.open(url, '_blank');
 }
 
 function sendCrmWhatsApp() {
-  const phone = document.getElementById('crmMsgPhone')?.value?.trim();
-  const name = document.getElementById('crmMsgName')?.value?.trim();
-  const body = document.getElementById('crmMsgBody')?.value?.trim();
+  const phoneEl = document.getElementById('crmMsgPhone');
+  const nameEl = document.getElementById('crmMsgName');
+  const bodyEl = document.getElementById('crmMsgBody');
+
+  const phone = phoneEl ? phoneEl.value.trim() : '';
+  const name = nameEl ? nameEl.value.trim() : '';
+  const body = bodyEl ? bodyEl.value.trim() : '';
 
   if (!phone) {
     alert('Клиент номерін толтыр');
@@ -525,29 +528,31 @@ function sendCrmWhatsApp() {
   }
 
   let text = 'Сәлеметсіз бе';
-  if (name) {
-    text += ', ' + name;
-  }
-  if (body) {
-    text += '! ' + body;
-  } else {
-    text += '!';
-  }
+  if (name) text += ', ' + name;
+  text += '!';
+  if (body) text += ' ' + body;
 
   openWhatsApp(phone, text);
 }
 
 function sendNoticeWhatsApp() {
-  const studentId = document.getElementById('noticeStudent')?.value;
-  const customBody = document.getElementById('noticeBody')?.value?.trim();
-  const type = document.getElementById('noticeType')?.value || 'Төлем уақыты келді';
+  const studentEl = document.getElementById('noticeStudent');
+  const bodyEl = document.getElementById('noticeBody');
+  const typeEl = document.getElementById('noticeType');
+
+  const studentId = studentEl ? studentEl.value : '';
+  const customBody = bodyEl ? bodyEl.value.trim() : '';
+  const type = typeEl ? typeEl.value : 'Төлем уақыты келді';
 
   if (!studentId) {
     alert('Оқушыны таңда');
     return;
   }
 
-  const st = (data.students || []).find(x => x.id === studentId);
+  const st = (data.students || []).find(function (x) {
+    return x.id === studentId;
+  });
+
   if (!st) {
     alert('Оқушы табылмады');
     return;
@@ -557,45 +562,28 @@ function sendNoticeWhatsApp() {
   const name = st.full_name || 'оқушы';
   const amount = Number(st.debt_amount  st.monthly_fee  0);
 
-  let text = customBody || '';
+  let text = customBody;
 
   if (!text) {
     if (type === 'Қарыз қалды') {
-      text =
-        'Сәлеметсіз бе! ' +
-        name +
-        ' бойынша қарыз: ' +
-        money(amount) +
-        '. Төлеу күні: ' +
-        (st.next_payment_date || '—') +
-        '.';
+      text = 'Сәлеметсіз бе! ' + name + ' бойынша қарыз: ' + money(amount) + '. Төлеу күні: ' + (st.next_payment_date || '—') + '.';
     } else if (type === 'Сабаққа келмеді') {
       text = 'Сәлеметсіз бе! ' + name + ' бүгін сабаққа келмеді.';
     } else {
-      text =
-        'Сәлеметсіз бе! ' +
-        name +
-        ' үшін төлем уақыты келді. Сома: ' +
-        money(amount) +
-        '. Күні: ' +
-        (st.next_payment_date || '—') +
-        '.';
+      text = 'Сәлеметсіз бе! ' + name + ' үшін төлем уақыты келді. Сома: ' + money(amount) + '. Күні: ' + (st.next_payment_date || '—') + '.';
     }
   }
 
   openWhatsApp(phone, text);
 }
 
-// Батырмаларды қауіпсіз байлау
-const crmBtn = document.getElementById('crmMsgSend');
-if (crmBtn) {
-  crmBtn.onclick = sendCrmWhatsApp;
-}
+(function () {
+  const crmBtn = document.getElementById('crmMsgSend');
+  if (crmBtn) crmBtn.onclick = sendCrmWhatsApp;
 
-const sendBtn = document.getElementById('sendBtn');
-if (sendBtn) {
-  sendBtn.onclick = sendNoticeWhatsApp;
-}
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) sendBtn.onclick = sendNoticeWhatsApp;
+})();
 </script>
 </body>
 </html>
