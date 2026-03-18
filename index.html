@@ -224,7 +224,7 @@ body.innerHTML=rows.map(x=>`<tr>
 <td><button class="btn green" onclick="updateRow('cashbox_entries','${x.id}',this)">Сақтау</button></td>
 <td><button class="btn" onclick="deleteRow('cashbox_entries','${x.id}')">Өшіру</button></td>
 </tr>`).join('');
-
+}
 function renderProgress(){const rows=profile.role==='parent'?data.progress.filter(x=>x.student_id===parentStudent.id):data.progress,q=(document.getElementById('progSearch').value||'').toLowerCase();document.getElementById('progressBody').innerHTML=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td>${esc(st?.full_name||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="homework">${esc(x.homework)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="test_score">${esc(x.test_score||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="progress_status">${esc(x.progress_status)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="teacher_comment">${esc(x.teacher_comment)}</td>${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('education_records','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('education_records','${x.id}')">Өшіру</button></td>`}</tr>`}).join('')}
 function renderProfiles(){document.getElementById('profilesBody').innerHTML=data.profiles.map(x=>{const b=data.branches.find(y=>y.id===x.branch_id);return `<tr><td>${esc(x.full_name)}</td><td>${esc(x.email)}</td><td>${esc(x.role)}</td><td>${esc(b?.name||'')}</td></tr>`}).join('')}
 function renderBranches(){document.getElementById('branchesBody').innerHTML=data.branches.map(x=>`<tr><td contenteditable="true" data-col="name">${esc(x.name)}</td><td contenteditable="true" data-col="city">${esc(x.city)}</td><td contenteditable="true" data-col="address">${esc(x.address||'')}</td><td contenteditable="true" data-col="phone">${esc(x.phone||'')}</td><td><button class="btn green" onclick="updateRow('branches','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('branches','${x.id}')">Өшіру</button></td></tr>`).join('')}
@@ -239,17 +239,17 @@ const missedCount=attendanceRows.filter(x=>x.attendance_status!=='Келді').l
 document.getElementById('parentKpis').innerHTML=[
   ['Қатысқан күн',`${cameCount} күн`],
   ['Келмеген күн',`${missedCount} күн`],
-  ['',st.next_payment_date||'—'],
+  ['Келесі төлем',st.next_payment_date||'—'],
   ['Қарыз',money((latestPayment&&latestPayment.debt_amount)||st.debt_amount||0)],
   ['Статус',latestPayment.payment_status||st.payment_status||'—'],
-  ['',st.last_payment_date||latestPayment.paid_at||'—']
+  ['Соңғы төлем',st.last_payment_date||latestPayment.paid_at||'—']
 ].map(x=>`<div class="card kpi"><div class="label">${x[0]}</div><div class="value" style="font-size:22px">${x[1]}</div></div>`).join('');
 document.getElementById('parentInfoBody').innerHTML=
 `<tr><th>Оқушы</th><td>${esc(st.full_name||'')}</td></tr>
 <tr><th>Бағыт</th><td>${esc(st.direction||'')}</td></tr>
 <tr><th>Айлық төлем</th><td>${money(st.monthly_fee||0)}</td></tr>
-<tr><th> күні</th><td>${esc(st.last_payment_date||latestPayment.paid_at||'—')}</td></tr>
-<tr><th> күні</th><td>${esc(st.next_payment_date||'—')}</td></tr>
+<tr><th>Соңғы төлем күні</th><td>${esc(st.last_payment_date||latestPayment.paid_at||'—')}</td></tr>
+<tr><th>Келесі төлем күні</th><td>${esc(st.next_payment_date||'—')}</td></tr>
 <tr><th>Қарыз</th><td>${money((latestPayment&&latestPayment.debt_amount)||st.debt_amount||0)}</td></tr>
 <tr><th>Код</th><td>${esc(st.student_code||'')}</td></tr>`;
 document.getElementById('parentNoticesBody').innerHTML=attendanceRows.map(x=>`<tr><td>${esc(x.lesson_date||'')}</td><td>${esc(x.attendance_status||'')}</td><td>${esc(x.topic||'')}</td></tr>`).join('');
