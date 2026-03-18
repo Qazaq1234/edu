@@ -529,8 +529,8 @@ function sendCrmWhatsApp(){
     return;
   }
 
-  const text = Сәлеметсіз бе${name ? ', ' + name : ''}! ${body || ''};
-  openWhatsApp(phone, text);
+  const text = `Сәлеметсіз бе${name ? ', ' + name : ''}! ${body || ''}`;
+openWhatsApp(phone, text);
 }
 
 function sendNoticeWhatsApp(){
