@@ -533,7 +533,7 @@ function sendCrmWhatsApp(){
     return;
   }
 
-  const text = Сәлеметсіз бе ${name ? ', ' + name : ''}! ${body};
+  const text = `Сәлеметсіз бе ${name ? ', ' + name : ''}! ${body}`;
   openWhatsApp(phone, text);
 }
 
