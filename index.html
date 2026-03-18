@@ -519,20 +519,19 @@ function sendCrmWhatsApp(){
   window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')}`, '_blank');
 }
 
-function sendCrmWhatsApp(){
+function sendCrmWhatsApp() {
   const phone = document.getElementById('crmMsgPhone')?.value?.trim();
   const name = document.getElementById('crmMsgName')?.value?.trim();
   const body = document.getElementById('crmMsgBody')?.value?.trim();
 
-  if(!phone){
+  if (!phone) {
     alert('Клиент номерін толтыр');
     return;
   }
 
   const text = `Сәлеметсіз бе${name ? ', ' + name : ''}! ${body || ''}`;
-openWhatsApp(phone, text);
+  openWhatsApp(phone, text);
 }
-
 function sendNoticeWhatsApp(){
   const studentId = document.getElementById('noticeStudent')?.value;
   const type = document.getElementById('noticeType')?.value;
