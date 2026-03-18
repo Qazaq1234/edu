@@ -428,7 +428,30 @@ async function deleteRow(table,id){
   await loadAll(); renderAll();
 }
 async function logout(){await sb.auth.signOut();location.reload()}
-document.getElementById('signUpDirectorBtn').onclick=signUpDirector;document.getElementById('loginBtn').onclick=login;document.getElementById('parentLoginBtn').onclick=parentLogin;document.getElementById('logoutBtn').onclick=logout;document.getElementById('logoutBtnTop').onclick=logout;document.getElementById('saveLeadBtn').onclick=saveLead;document.getElementById('saveStudentBtn').onclick=saveStudent;document.getElementById('saveGroupBtn').onclick=saveGroup;document.getElementById('saveAttendanceBtn').onclick=saveAttendance;document.getElementById('saveCashBtn').onclick=saveCash;document.getElementById('savePaymentBtn').onclick=savePayment;document.getElementById('openStudentPaymentBtn').onclick=()=>openPaymentForStudent(val('paymentStudent'));document.getElementById('saveSalaryBtn').onclick=saveSalary;document.getElementById('saveExpenseBtn').onclick=saveExpense;document.getElementById('saveProgBtn').onclick=saveProgress;document.getElementById('saveInviteBtn').onclick=saveInvite;document.getElementById('saveBranchBtn').onclick=saveBranch;const saveNoticeBtn=document.getElementById('saveNoticeBtn'); if(saveNoticeBtn) saveNoticeBtn.onclick=saveNotice;document.getElementById('sendBtn').onclick=sendNotice;document.getElementById('crmMsgSend').onclick=sendCrm;document.getElementById('studentBirthDate').onchange=()=>document.getElementById('studentAge').value=ageFromDate(val('studentBirthDate'))?ageFromDate(val('studentBirthDate'))+' жас':'';document.getElementById('noticeType').onchange=()=>{const sid=val('noticeStudent'); if(sid) document.getElementById('noticeBody').value=messageForStudent(sid,val('noticeType'));}; document.getElementById('noticeStudent').onchange=()=>{const sid=val('noticeStudent'); if(sid) document.getElementById('noticeBody').value=messageForStudent(sid,val('noticeType'));}; ['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch','paymentSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',renderAll);});(async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
+function bindClick(id, fn){const el=document.getElementById(id); if(el) el.onclick=fn;}
+bindClick('signUpDirectorBtn',signUpDirector);
+bindClick('loginBtn',login);
+bindClick('parentLoginBtn',parentLogin);
+bindClick('logoutBtn',logout);
+bindClick('logoutBtnTop',logout);
+bindClick('saveLeadBtn',saveLead);
+bindClick('saveStudentBtn',saveStudent);
+bindClick('saveGroupBtn',saveGroup);
+bindClick('saveAttendanceBtn',saveAttendance);
+bindClick('saveCashBtn',saveCash);
+bindClick('savePaymentBtn',savePayment);
+bindClick('openStudentPaymentBtn',()=>setSection('payments'));
+bindClick('saveSalaryBtn',saveSalary);
+bindClick('saveExpenseBtn',saveExpense);
+bindClick('saveProgBtn',saveProgress);
+bindClick('saveInviteBtn',saveInvite);
+bindClick('saveBranchBtn',saveBranch);
+bindClick('sendBtn',sendNoticeWhatsApp);
+bindClick('crmMsgSend',sendCrmWhatsApp);
+const birthEl=document.getElementById('studentBirthDate');
+if(birthEl) birthEl.onchange=()=>{const a=ageFromDate(val('studentBirthDate')); const target=document.getElementById('studentAge'); if(target) target.value=a? a+' жас' : ''};
+['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch','paymentSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',()=>renderAll());});
+(async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
 
 function downloadFile(name, content, type){
   const blob=new Blob([content],{type});
