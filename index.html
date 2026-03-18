@@ -561,7 +561,7 @@ function sendNoticeWhatsApp(){
 
   if(!text){
     if(type === 'Қарыз'){
-      text = Сәлеметсіз бе! ${st.full_name} бойынша қарыз: ${money(amount)}. Төлеу күні: ${st.next_payment_date || '—'}.;
+      text = `Сәлеметсіз бе! ${st.full_name} бойынша қарыз: ${money(amount)}. Төлеу күні: ${st.next_payment_date || '—'}.`;
     } else {
       text = Сәлеметсіз бе! ${st.full_name} үшін төлем уақыты келді. Сома: ${money(amount)}. Күні: ${st.next_payment_date || '—'}.;
     }
