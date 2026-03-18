@@ -529,7 +529,14 @@ function sendCrmWhatsApp() {
     return;
   }
 
-  const text = `Сәлеметсіз бе${name ? ', ' + name : ''}! ${body || ''}`;
+  let text = 'Сәлеметсіз бе';
+
+  if (name) {
+    text += ', ' + name;
+  }
+
+  text += '! ' + (body || '');
+
   openWhatsApp(phone, text);
 }
 function sendNoticeWhatsApp(){
