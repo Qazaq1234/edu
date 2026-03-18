@@ -555,7 +555,7 @@ function sendNoticeWhatsApp(){
     return;
   }
 
-  const amount = Number(st.debt_amount  st.monthly_fee  0);
+  const amount = Number(st.debt_amount||  st.monthly_fee||  0);
 
   let text = customBody;
 
