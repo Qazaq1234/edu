@@ -520,57 +520,48 @@ function sendCrmWhatsApp(){
 }
 
 function sendCrmWhatsApp(){
-  const phoneEl = document.getElementById('crmMsgPhone');
-  const nameEl = document.getElementById('crmMsgName');
-  const bodyEl = document.getElementById('crmMsgBody');
-
-  const phone = phoneEl ? phoneEl.value.trim() : '';
-  const name = nameEl ? nameEl.value.trim() : '';
-  const body = bodyEl ? bodyEl.value.trim() : '';
+  const phone = document.getElementById('crmMsgPhone')?.value?.trim();
+  const name = document.getElementById('crmMsgName')?.value?.trim();
+  const body = document.getElementById('crmMsgBody')?.value?.trim();
 
   if(!phone){
-    alert('Клиенттің номерін толтыр');
+    alert('Клиент номерін толтыр');
     return;
   }
 
-  const text = `Сәлеметсіз бе ${name ? ', ' + name : ''}! ${body}`;
+  const text = Сәлеметсіз бе${name ? ', ' + name : ''}! ${body || ''};
   openWhatsApp(phone, text);
 }
 
 function sendNoticeWhatsApp(){
-  const studentSelect = document.getElementById('noticeStudent');
-  const bodyEl = document.getElementById('noticeBody');
-  const typeEl = document.getElementById('noticeType');
-
-  const studentId = studentSelect ? studentSelect.value : '';
-  const customBody = bodyEl ? bodyEl.value.trim() : '';
-  const type = typeEl ? typeEl.value : 'Төлем уақыты келді';
+  const studentId = document.getElementById('noticeStudent')?.value;
+  const type = document.getElementById('noticeType')?.value;
+  const customBody = document.getElementById('noticeBody')?.value?.trim();
 
   if(!studentId){
     alert('Оқушыны таңда');
     return;
   }
 
-  const st = (data.students || []).find(x => x.id === studentId);
+  const st = data.students.find(x => x.id === studentId);
   if(!st){
     alert('Оқушы табылмады');
     return;
   }
 
   const amount = Number(st.debt_amount  st.monthly_fee  0);
+
   let text = customBody;
 
   if(!text){
-    if(type === 'Қарыз қалды'){
-      text = Сәлеметсіз бе! ${st.full_name} бойынша қарыз бар: ${money(amount)}. Төлеу күні: ${st.next_payment_date || '—'}.;
-    } else if(type === 'Сабаққа келмеді'){
-      text = Сәлеметсіз бе! ${st.full_name} бүгін сабаққа келмеді.;
+    if(type === 'Қарыз'){
+      text = Сәлеметсіз бе! ${st.full_name} бойынша қарыз: ${money(amount)}. Төлеу күні: ${st.next_payment_date || '—'}.;
     } else {
-      text = Сәлеметсіз бе! ${st.full_name} үшін төлем күні: ${st.next_payment_date || '—'}. Төлеу керек сома: ${money(amount)}.;
+      text = Сәлеметсіз бе! ${st.full_name} үшін төлем уақыты келді. Сома: ${money(amount)}. Күні: ${st.next_payment_date || '—'}.;
     }
   }
 
-  openWhatsApp(st.phone || st.whatsapp_phone, text);
+  openWhatsApp(st.phone, text);
 }
 </script>
 </body>
