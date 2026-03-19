@@ -574,8 +574,6 @@ const birthEl=document.getElementById('studentBirthDate');
 if(birthEl) birthEl.onchange=()=>{const t=document.getElementById('studentAge'); if(t) t.value=ageFromDate(val('studentBirthDate'))?ageFromDate(val('studentBirthDate'))+' жас':''};
 ['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',()=>renderAll());});
 (async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
-
 </script>
-
 </body>
 </html>
