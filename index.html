@@ -277,28 +277,23 @@ document.getElementById('parentInfoBody').innerHTML=
 document.getElementById('parentNoticesBody').innerHTML=attendanceRows.map(x=>`<tr><td>${esc(x.lesson_date||'')}</td><td>${esc(x.attendance_status||'')}</td><td>${esc(x.topic||'')}</td></tr>`).join('');
 }
 function fillSelects(){const branchOpts='<option value="">Филиал</option>'+data.branches.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');['studentBranch','groupBranch','inviteBranch'].forEach(id=>document.getElementById(id).innerHTML=branchOpts);const studentOpts=data.students.map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');['noticeStudent','progStudent','attStudent','paymentStudent'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=studentOpts});document.getElementById('attGroup').innerHTML=data.groups.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}
-async function saveLead(){const r=await sb.from('leads').insert({full_name:val('leadName'),phone:val('leadPhone'),direction:val('leadDirection'),source:val('leadSource'),stage:val('leadStage'),manager_note:val('leadNote')});if(r.error)return alert(r.error.message);await loadAll();renderLeads()}
-async function saveStudent(){
-const monthly=Number(val('studentFee')||0);
-const firstDate=val('studentNextPayment')||new Date().toISOString().slice(0,10);
-const nextDate=addOneMonth(firstDate);
-const r=await sb.from('students').insert({
-  full_name:val('studentName'),
-  parent_name:val('studentParent'),
-  phone:val('studentPhone'),
-  whatsapp_phone:val('studentPhone'),
-  direction:val('studentDirection'),
-  student_code:val('studentCode'),
-  pin_code:val('studentPin'),
-  birth_date:val('studentBirthDate')||null,
-  monthly_fee:monthly,
-  first_payment_date:firstDate,
-  last_payment_date:null,
-  next_payment_date:nextDate,
-  payment_status:'Төлемеді',
-  debt_amount:monthly,
-  discount_amount:0,
-  branch_id:val('studentBranch')||null
+async function saveLead() {
+  if (!profile?.tenant_id) return alert('tenant_id жоқ');
+
+  const r = await sb.from('leads').insert({
+    tenant_id: profile.tenant_id,
+    branch_id: profile.branch_id || null,
+    full_name: val('leadName'),
+    phone: val('leadPhone'),
+    direction: val('leadDirection'),
+    source: val('leadSource'),
+    stage: val('leadStage'),
+    manager_note: val('leadNote')
+  });
+
+  if (r.error) return alert(r.error.message);
+  await loadAll();
+  renderLeads();
 }).select().single();
 if(r.error)return alert(r.error.message);
 const p=await sb.from('payments').insert({
@@ -316,34 +311,90 @@ const p=await sb.from('payments').insert({
 if(p.error)return alert(p.error.message);
 await loadAll();renderAll()
 }
-async function saveGroup(){const r=await sb.from('groups').insert({name:val('groupName'),direction:val('groupDirection'),teacher_name:val('groupTeacherName'),schedule:val('groupSchedule'),room:val('groupRoom'),branch_id:val('groupBranch')||null});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveAttendance(){const r=await sb.from('attendance_journal').insert({group_id:val('attGroup')||null,student_id:val('attStudent')||null,lesson_date:val('attDate'),topic:val('attTopic'),attendance_status:val('attStatus'),homework:val('attHomework'),teacher_comment:val('attComment'),created_by:session?.user?.id||null});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveCash(){
-const payload={
-  entry_type:val('cashType'),
-  amount:Number(val('cashAmount')||0),
-  entry_date:val('cashDate')||null,
-  person_name:val('cashPerson'),
-  category:val('cashCategory'),
-  note:val('cashNote')
+async function saveGroup() {
+  if (!profile?.tenant_id) return alert('tenant_id жоқ');
+
+  const r = await sb.from('groups').insert({
+    tenant_id: profile.tenant_id,
+    branch_id: val('groupBranch') || profile.branch_id || null,
+    name: val('groupName'),
+    direction: val('groupDirection'),
+    teacher_name: val('groupTeacherName'),
+    schedule: val('groupSchedule'),
+    room: val('groupRoom')
+  });
+
+  if (r.error) return alert(r.error.message);
+  await loadAll();
+  renderAll();
 };
 const r=await sb.from('cashbox_entries').insert(payload);
 if(r.error)return alert(r.error.message);
 await loadAll();renderFinance();alert('Сақталды')
 }
-async function savePayment(){
-const studentId=val('paymentStudent');
-if(!studentId) return alert('Баланы таңда');
-const st=data.students.find(x=>x.id===studentId);
-if(!st) return alert('Оқушы табылмады');
-const paidAmount=Number(val('paymentAmount')||0);
-const discount=Number(val('paymentDiscount')||0);
-const paidDate=val('paymentPaidDate')||new Date().toISOString().slice(0,10);
-const nextDate=val('paymentNextDate')||addOneMonth(paidDate);
-const debt=Math.max(Number(st.monthly_fee||0)-paidAmount-discount,0);
-let status=val('paymentStatus');
-if(!status){
-  status = paidAmount<=0 ? 'Төлемеді' : (debt>0 ? 'Жартылай' : 'Төледі');
+async function savePayment() {
+  if (!profile?.tenant_id) return alert('tenant_id жоқ');
+
+  const studentId = val('paymentStudent');
+  if (!studentId) return alert('Баланы таңда');
+
+  const st = data.students.find(x => x.id === studentId);
+  if (!st) return alert('Оқушы табылмады');
+
+  const paidAmount = Number(val('paymentAmount') || 0);
+  const discount = Number(val('paymentDiscount') || 0);
+  const paidDate = val('paymentPaidDate') || new Date().toISOString().slice(0,10);
+  const nextDate = val('paymentNextDate') || addOneMonth(paidDate);
+  const debt = Math.max(Number(st.monthly_fee || 0) - paidAmount - discount, 0);
+
+  let status = val('paymentStatus');
+  if (!status) {
+    status = paidAmount <= 0 ? 'Төлемеді' : (debt > 0 ? 'Жартылай' : 'Төледі');
+  }
+
+  const p = await sb.from('payments').insert({
+    tenant_id: profile.tenant_id,
+    student_id: studentId,
+    branch_id: st.branch_id || profile.branch_id || null,
+    paid_at: paidDate,
+    due_date: nextDate,
+    paid_amount: paidAmount,
+    discount_amount: discount,
+    debt_amount: debt,
+    payment_status: status,
+    billing_month: paidDate.slice(0,7),
+    note: val('paymentNote')
+  }).select().single();
+
+  if (p.error) return alert(p.error.message);
+
+  const s = await sb.from('students').update({
+    last_payment_date: paidDate,
+    next_payment_date: nextDate,
+    payment_status: status,
+    debt_amount: debt,
+    discount_amount: discount
+  }).eq('id', studentId);
+
+  if (s.error) return alert(s.error.message);
+
+  if (paidAmount > 0) {
+    const c = await sb.from('cashbox_entries').insert({
+      tenant_id: profile.tenant_id,
+      branch_id: st.branch_id || profile.branch_id || null,
+      entry_type: 'Кіріс',
+      amount: paidAmount,
+      entry_date: paidDate,
+      person_name: st.parent_name || st.full_name,
+      category: 'Төлем',
+      note: `${st.full_name} төлемі`
+    });
+    if (c.error) return alert(c.error.message);
+  }
+
+  await loadAll();
+  renderAll();
+  alert('Төлем сақталды');
 }
 const p=await sb.from('payments').insert({
   student_id:studentId,
@@ -392,97 +443,37 @@ async function updatePaymentRow(id,btn){
   if(r.error) return alert(r.error.message);
   await loadAll();renderAll();alert('Сақталды')
 }
-async function saveProgress(){const r=await sb.from('education_records').insert({student_id:val('progStudent'),homework:val('progHomework'),test_score:Number(val('progScore')||0),progress_status:val('progStatus'),teacher_comment:val('progComment')});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveInvite() {
-  try {
-    const { data: sessionData } = await sb.auth.getSession();
-    const currentSession = sessionData?.session;
+async function saveProgress() {
+  if (!profile?.tenant_id) return alert('tenant_id жоқ');
 
-    if (!currentSession?.access_token) {
-      alert("Қайта кіріп көр. Сессия табылмады.");
-      return;
-    }
+  const r = await sb.from('education_records').insert({
+    tenant_id: profile.tenant_id,
+    branch_id: profile.branch_id || null,
+    student_id: val('progStudent'),
+    homework: val('progHomework'),
+    test_score: Number(val('progScore') || 0),
+    progress_status: val('progStatus'),
+    teacher_comment: val('progComment')
+  });
 
-    const tenant =
-      data.tenants.find(t => t.owner_user_id === currentSession.user?.id) ||
-      data.tenants.find(t => t.id === profile?.tenant_id);
-
-    if (!tenant) {
-      alert("tenant жоқ");
-      return;
-    }
-
-    const branchId = document.getElementById("inviteBranch").value;
-
-    const payload = {
-      full_name: document.getElementById("inviteName").value.trim(),
-      email: document.getElementById("inviteEmail").value.trim(),
-      password: document.getElementById("invitePassword").value.trim(),
-      role: document.getElementById("inviteRole").value,
-      tenant_id: tenant.id,
-      branch_id: branchId || null,
-    };
-
-    if (!payload.full_name || !payload.email || !payload.password || !payload.role) {
-      alert("Барлық өрісті толтыр");
-      return;
-    }
-
-    const res = await fetch(
-      "https://octuoiwqmsoryglxuznt.supabase.co/functions/v1/create-staff-user",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${currentSession.access_token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
-
-    const raw = await res.text();
-    let result;
-    try {
-      result = JSON.parse(raw);
-    } catch {
-      result = { raw };
-    }
-
-    console.log("INVITE STATUS:", res.status);
-    console.log("INVITE RESULT:", result);
-
-    if (!res.ok) {
-      alert("Қате: " + (result?.message || result?.error || JSON.stringify(result)));
-      return;
-    }
-
-    alert("Қызметкер аккаунты ашылды ✅");
-
-    await loadAll();
-    renderAll();
-
-    document.getElementById("inviteName").value = "";
-    document.getElementById("inviteEmail").value = "";
-    document.getElementById("invitePassword").value = "";
-
-  } catch (e) {
-    console.error("SAVE INVITE ERROR:", e);
-    alert("Сервер қатесі: " + (e?.message || e));
-  }
+  if (r.error) return alert(r.error.message);
+  await loadAll();
+  renderAll();
 }
-async function saveBranch(){const r=await sb.from('branches').insert({name:val('branchName'),city:val('branchCity'),address:val('branchAddress'),phone:val('branchPhone')});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveNotice(){const r=await sb.from('notifications').insert({student_id:val('noticeStudent'),title:val('noticeType'),body:val('noticeBody'),channel:'WhatsApp',created_by:session?.user?.id||null});if(r.error)return alert(r.error.message);await loadAll();renderAll();alert('Хабарлама сақталды')}
-function renderCalendar(){const mSel=document.getElementById('monthSelect'),ySel=document.getElementById('yearSelect');if(!mSel.options.length){['Қаңтар','Ақпан','Наурыз','Сәуір','Мамыр','Маусым','Шілде','Тамыз','Қыркүйек','Қазан','Қараша','Желтоқсан'].forEach((m,i)=>mSel.add(new Option(m,i)));for(let y=2024;y<=2030;y++)ySel.add(new Option(String(y),y));const now=new Date();mSel.value=now.getMonth();ySel.value=now.getFullYear();mSel.onchange=renderCalendar;ySel.onchange=renderCalendar;}const month=Number(mSel.value),year=Number(ySel.value),first=new Date(year,month,1),lastDate=new Date(year,month+1,0).getDate(),start=(first.getDay()+6)%7,grid=document.getElementById('calendarGrid');grid.innerHTML='';['Дс','Сс','Ср','Бс','Жм','Сб','Жс'].forEach(d=>{const n=document.createElement('div');n.className='day-name';n.textContent=d;grid.appendChild(n)});for(let i=0;i<start;i++){const c=document.createElement('div');c.className='day-cell';c.style.opacity='.35';grid.appendChild(c)}for(let day=1;day<=lastDate;day++){const date=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,count=data.attendance.filter(x=>x.lesson_date===date).length,c=document.createElement('div');c.className='day-cell';c.innerHTML=`<strong>${day}</strong><div style="font-size:11px;color:#6b7280;margin-top:6px">${count} жазба</div>`;c.onclick=()=>{document.querySelectorAll('.day-cell').forEach(x=>x.classList.remove('active'));c.classList.add('active');document.getElementById('selectedDateLabel').textContent=date;const rows=data.attendance.filter(x=>x.lesson_date===date);document.getElementById('dayAttendanceBody').innerHTML=rows.length?rows.map(x=>{const st=data.students.find(s=>s.id===x.student_id),gr=data.groups.find(g=>g.id===x.group_id);return `<tr><td>${esc(st?.full_name||'')}</td><td>${esc(gr?.name||'')}</td><td>${esc(x.attendance_status)}</td></tr>`}).join(''):'<tr><td colspan="3">Бұл күнге жазба жоқ</td></tr>'};grid.appendChild(c)}}
+async function saveBranch() {
+  if (!profile?.tenant_id) return alert('tenant_id жоқ');
 
+  const r = await sb.from('branches').insert({
+    tenant_id: profile.tenant_id,
+    name: val('branchName'),
+    city: val('branchCity'),
+    address: val('branchAddress'),
+    phone: val('branchPhone')
+  });
 
-function openWhatsApp(phone,text){
-  const cleaned = String(phone || '').replace(/[^\d]/g,'');
-  if (!cleaned) {
-    alert('Телефон нөмірі жоқ');
-    return;
-  }
-  window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')}`,'_blank');
+  if (r.error) return alert(r.error.message);
+  await loadAll();
+  renderAll();
 }
 function sendNotice(){
   const st = data.students.find(x => x.id === val('noticeStudent'));
