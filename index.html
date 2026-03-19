@@ -221,7 +221,32 @@ async function signUpDirector() {
 }
 async function login(){const auth=await sb.auth.signInWithPassword({email:val('loginEmail'),password:val('loginPassword')});if(auth.error)return alert(auth.error.message);await bootstrap();}
 async function bootstrap(){const s=await sb.auth.getSession();session=s.data.session;if(!session)return;const p=await sb.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle();if(p.error)return alert(p.error.message);if(!p.data)return alert('profiles кестесінде user табылмады');profile=p.data;parentStudent=null;await loadAll();openApp();}
-async function parentLogin(){const st=await sb.from('students').select('*').eq('student_code',val('parentCode')).eq('pin_code',val('parentPin')).maybeSingle();if(st.error)return alert(st.error.message);if(!st.data)return alert('Student code немесе PIN қате');parentStudent=st.data;profile={role:'parent',tenant_id:st.data.tenant_id,branch_id:st.data.branch_id,full_name:st.data.parent_name||'Ата-ана'};await loadAll();openApp();}
+async function parentLogin(){
+  const code = val('parentCode').trim();
+  const pin = val('parentPin').trim();
+
+  if (!code || !pin) return alert('Student code және PIN енгіз');
+
+  const st = await sb.rpc('parent_login_check', {
+    p_code: code,
+    p_pin: pin
+  });
+
+  if (st.error) return alert(st.error.message);
+  if (!st.data || !st.data.length) return alert('Student code немесе PIN қате');
+
+  parentStudent = st.data[0];
+  profile = {
+    role:'parent',
+    tenant_id: parentStudent.tenant_id,
+    branch_id: parentStudent.branch_id,
+    full_name: parentStudent.parent_name || 'Ата-ана'
+  };
+
+  await loadAll();
+  await loadParentCabinet();
+  openApp();
+}
 async function loadAll(){const rs=await Promise.all([
 sb.from('tenants').select('*').order('created_at',{ascending:false}),
 sb.from('branches').select('*').order('created_at',{ascending:false}),
@@ -254,6 +279,36 @@ document.getElementById('studentsBody').innerHTML=rows.filter(x=>JSON.stringify(
 ${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('students','${x.id}',this)">Сақтау</button></td><td><button class="btn purple" onclick="openPaymentForStudent('${x.id}')">Төлем</button></td><td><button class="btn" onclick="showPaymentHistory('${x.id}')">Тарих</button></td><td><button class="btn" onclick="deleteRow('students','${x.id}')">Өшіру</button></td>`}
 </tr>`).join('')
 }
+
+async function loadParentCabinet(){
+  if (!parentStudent) return;
+
+  const code = val('parentCode').trim();
+  const pin = val('parentPin').trim();
+
+  const att = await sb.rpc('parent_attendance', {
+    p_code: code,
+    p_pin: pin
+  });
+  if (att.error) return alert(att.error.message);
+
+  const prog = await sb.rpc('parent_progress', {
+    p_code: code,
+    p_pin: pin
+  });
+  if (prog.error) return alert(prog.error.message);
+
+  const pays = await sb.rpc('parent_payments', {
+    p_code: code,
+    p_pin: pin
+  });
+  if (pays.error) return alert(pays.error.message);
+
+  data.attendance = att.data || [];
+  data.progress = prog.data || [];
+  data.payments = pays.data || [];
+}
+
 function renderGroups(){const q=(document.getElementById('groupSearch').value||'').toLowerCase();document.getElementById('groupsBody').innerHTML=data.groups.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<tr><td contenteditable="true" data-col="name">${esc(x.name)}</td><td contenteditable="true" data-col="direction">${esc(x.direction)}</td><td contenteditable="true" data-col="teacher_name">${esc(x.teacher_name)}</td><td contenteditable="true" data-col="schedule">${esc(x.schedule)}</td><td contenteditable="true" data-col="room">${esc(x.room)}</td><td><button class="btn green" onclick="updateRow('groups','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('groups','${x.id}')">Өшіру</button></td></tr>`).join('')}
 function renderAttendance(){const rows=profile.role==='parent'?data.attendance.filter(x=>x.student_id===parentStudent.id):data.attendance,q=(document.getElementById('attendanceSearch').value||'').toLowerCase();document.getElementById('attendanceBody').innerHTML=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="lesson_date">${esc(x.lesson_date)}</td><td>${esc(st?.full_name||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="topic">${esc(x.topic)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="attendance_status">${esc(x.attendance_status)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="homework">${esc(x.homework)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="teacher_comment">${esc(x.teacher_comment||'')}</td>${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('attendance_journal','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('attendance_journal','${x.id}')">Өшіру</button></td>`}</tr>`}).join('')}
 function renderPayments(){
