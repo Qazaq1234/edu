@@ -139,7 +139,84 @@ function ageFromDate(d){if(!d) return ''; const dob=new Date(d), t=new Date(); l
 function setSection(id){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.section===id));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=titles[id][0];document.getElementById('pageSub').textContent=titles[id][1];}
 document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=()=>setSection(btn.dataset.section));
 function applyRoleView(role){const allowed=roleSections[role]||['dashboard'];document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.toggle('hidden',!allowed.includes(btn.dataset.section)));setSection(role==='parent'?'parent':allowed[0]);}
-async function signUpDirector(){const full_name=val('suName'),email=val('suEmail'),password=val('suPassword'),tenantName=val('suTenant'),city=val('suCity'),direction=val('suDirection'),branchName=val('suBranch')||'Бас филиал';if(!email||!password||!tenantName)return alert('Міндетті өрістерді толтыр');const auth=await sb.auth.signUp({email,password});if(auth.error)return alert(auth.error.message);const userId=auth.data.user?.id||auth.data.session?.user?.id;if(!userId)return alert('Confirm email OFF қыл.');const tenant=await sb.from('tenants').insert({name:tenantName,slug:tenantName.toLowerCase().replace(/\s+/g,'-'),city,direction,status:'trial',owner_user_id:userId}).select().single();if(tenant.error)return alert(tenant.error.message);const branch=await sb.from('branches').insert({tenant_id:tenant.data.id,name:branchName,city}).select().single();if(branch.error)return alert(branch.error.message);const p=await sb.from('profiles').insert({user_id:userId,tenant_id:tenant.data.id,branch_id:branch.data.id,full_name,email,role:'director',status:'active'});if(p.error)return alert(p.error.message);const plan=await sb.from('plans').select('*').eq('code','start').maybeSingle();await sb.from('subscriptions').insert({tenant_id:tenant.data.id,plan_id:plan.data?.id||null,billing_cycle:'monthly',amount:plan.data?.monthly_price||0,status:'trial',note:'director signup'});await sb.from('invoices').insert({tenant_id:tenant.data.id,period_label:'Trial',amount:plan.data?.monthly_price||0,status:'unpaid'});alert('Тіркелді. Енді кіру батырмасын бас.');}
+async function signUpDirector() {
+  const full_name = val('suName');
+  const email = val('suEmail');
+  const password = val('suPassword');
+  const tenantName = val('suTenant');
+  const city = val('suCity');
+  const direction = val('suDirection');
+  const branchName = val('suBranch') || 'Бас филиал';
+
+  if (!email || !password || !tenantName) {
+    return alert('Міндетті өрістерді толтыр');
+  }
+
+  const auth = await sb.auth.signUp({ email, password });
+  if (auth.error) return alert(auth.error.message);
+
+  const userId = auth.data.user?.id || auth.data.session?.user?.id;
+  if (!userId) return alert('Confirm email OFF қыл.');
+
+  const tenant = await sb.from('tenants').insert({
+    name: tenantName,
+    slug: tenantName.toLowerCase().replace(/\s+/g, '-'),
+    city,
+    direction,
+    status: 'trial',
+    owner_user_id: userId
+  }).select().single();
+
+  if (tenant.error) return alert(tenant.error.message);
+
+  const p1 = await sb.from('profiles').insert({
+    user_id: userId,
+    tenant_id: tenant.data.id,
+    branch_id: null,
+    full_name,
+    email,
+    role: 'director',
+    status: 'active'
+  });
+
+  if (p1.error) return alert(p1.error.message);
+
+  const branch = await sb.from('branches').insert({
+    tenant_id: tenant.data.id,
+    name: branchName,
+    city
+  }).select().single();
+
+  if (branch.error) return alert(branch.error.message);
+
+  const p2 = await sb.from('profiles')
+    .update({ branch_id: branch.data.id })
+    .eq('user_id', userId);
+
+  if (p2.error) return alert(p2.error.message);
+
+  const plan = await sb.from('plans').select('*').eq('code', 'start').maybeSingle();
+
+  const sub = await sb.from('subscriptions').insert({
+    tenant_id: tenant.data.id,
+    plan_id: plan.data?.id || null,
+    billing_cycle: 'monthly',
+    amount: plan.data?.monthly_price || 0,
+    status: 'trial',
+    note: 'director signup'
+  });
+  if (sub.error) return alert(sub.error.message);
+
+  const inv = await sb.from('invoices').insert({
+    tenant_id: tenant.data.id,
+    period_label: 'Trial',
+    amount: plan.data?.monthly_price || 0,
+    status: 'unpaid'
+  });
+  if (inv.error) return alert(inv.error.message);
+
+  alert('Тіркелді. Енді кіру батырмасын бас.');
+}
 async function login(){const auth=await sb.auth.signInWithPassword({email:val('loginEmail'),password:val('loginPassword')});if(auth.error)return alert(auth.error.message);await bootstrap();}
 async function bootstrap(){const s=await sb.auth.getSession();session=s.data.session;if(!session)return;const p=await sb.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle();if(p.error)return alert(p.error.message);if(!p.data)return alert('profiles кестесінде user табылмады');profile=p.data;parentStudent=null;await loadAll();openApp();}
 async function parentLogin(){const st=await sb.from('students').select('*').eq('student_code',val('parentCode')).eq('pin_code',val('parentPin')).maybeSingle();if(st.error)return alert(st.error.message);if(!st.data)return alert('Student code немесе PIN қате');parentStudent=st.data;profile={role:'parent',tenant_id:st.data.tenant_id,branch_id:st.data.branch_id,full_name:st.data.parent_name||'Ата-ана'};await loadAll();openApp();}
