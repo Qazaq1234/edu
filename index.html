@@ -511,6 +511,51 @@ function exportPaymentsPDF(){
 }
 // v9 WhatsApp binding fix
 }
+  window.addEventListener('DOMContentLoaded', async () => {
+  const signUpBtn = document.getElementById('signUpDirectorBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const parentLoginBtn = document.getElementById('parentLoginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const logoutBtnTop = document.getElementById('logoutBtnTop');
+
+  if (signUpBtn && typeof signUpDirector === 'function') {
+    signUpBtn.onclick = signUpDirector;
+  }
+
+  if (loginBtn && typeof login === 'function') {
+    loginBtn.onclick = login;
+  }
+
+  if (parentLoginBtn && typeof parentLogin === 'function') {
+    parentLoginBtn.onclick = parentLogin;
+  }
+
+  if (logoutBtn && typeof logout === 'function') {
+    logoutBtn.onclick = logout;
+  }
+
+  if (logoutBtnTop && typeof logout === 'function') {
+    logoutBtnTop.onclick = logout;
+  }
+
+  const crmBtn = document.getElementById('crmMsgSend');
+  if (crmBtn && typeof sendCrm === 'function') {
+    crmBtn.onclick = sendCrm;
+  }
+
+  const waBtn = document.getElementById('sendWhatsAppBtn');
+  if (waBtn && typeof sendNotice === 'function') {
+    waBtn.onclick = sendNotice;
+  }
+
+  if (typeof sb !== 'undefined' && sb.auth) {
+    const s = await sb.auth.getSession();
+    session = s?.data?.session || null;
+    if (session && typeof bootstrap === 'function') {
+      await bootstrap();
+    }
+  }
+});
 </script>
 </body>
 </html>
