@@ -574,6 +574,38 @@ const birthEl=document.getElementById('studentBirthDate');
 if(birthEl) birthEl.onchange=()=>{const t=document.getElementById('studentAge'); if(t) t.value=ageFromDate(val('studentBirthDate'))?ageFromDate(val('studentBirthDate'))+' жас':''};
 ['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',()=>renderAll());});
 (async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
+  async function exportPaymentsPDF() {
+  const rows = getFinanceRows();
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 15;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(14);
+  doc.text("Tolem / Kiris / Shygys", 10, y);
+
+  y += 10;
+  doc.setFontSize(10);
+
+  rows.forEach((r, i) => {
+    const line = `${i + 1}. ${r.section} | ${r.student} | ${r.amount} | ${r.status} | ${r.date} | ${r.note || ''}`;
+
+    const split = doc.splitTextToSize(line, 180);
+    doc.text(split, 10, y);
+
+    y += split.length * 6;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 15;
+    }
+  });
+
+  doc.save("tolem-kiris-shygys.pdf");
+}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </body>
 </html>
