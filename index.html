@@ -169,7 +169,7 @@ async function signUpDirector() {
 
   if (tenant.error) return alert(tenant.error.message);
 
-  const p1 = await sb.from('profiles').insert({
+  const p1 = await sb.from('profiles').upsert({
     user_id: userId,
     tenant_id: tenant.data.id,
     branch_id: null,
@@ -177,6 +177,8 @@ async function signUpDirector() {
     email,
     role: 'director',
     status: 'active'
+  }, {
+    onConflict: 'user_id'
   });
 
   if (p1.error) return alert(p1.error.message);
@@ -190,7 +192,7 @@ async function signUpDirector() {
   if (branch.error) return alert(branch.error.message);
 
   const p2 = await sb.from('profiles')
-    .update({ branch_id: branch.data.id })
+    .update({ branch_id: branch.data.id, tenant_id: tenant.data.id })
     .eq('user_id', userId);
 
   if (p2.error) return alert(p2.error.message);
