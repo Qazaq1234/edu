@@ -1,164 +1,28 @@
 <!DOCTYPE html>
-<html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EduKZ CRM Portal</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-function downloadFile(name, content, type){
-  const blob=new Blob([content],{type});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=name;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-function getFinanceRows(){
-  const payments=(data.payments||[]).map(x=>({
-    section:'Төлем',
-    student:x.student_name||x.full_name||x.student_id||'',
-    amount:x.paid_amount||x.amount||0,
-    status:x.payment_status||'',
-    date:x.paid_at||x.created_at||'',
-    note:x.note||''
-  }));
-  const cash=(data.cashbox_entries||data.cashbox||[]).map(x=>({
-    section:x.entry_type||'Қаржы',
-    student:x.person_name||'',
-    amount:x.amount||0,
-    status:x.category||'',
-    date:x.entry_date||x.created_at||'',
-    note:x.note||''
-  }));
-  return [...payments,...cash];
-}
-function exportPaymentsExcel(){
-  const rows=getFinanceRows();
-  const header=['Бөлім','Оқушы/Аты','Сома','Статус/Категория','Күні','Ескерту'];
-  const csv=[header.join(',')].concat(rows.map(r=>[
-    `"${String(r.section).replace(/"/g,'""')}"`,
-    `"${String(r.student).replace(/"/g,'""')}"`,
-    r.amount,
-    `"${String(r.status).replace(/"/g,'""')}"`,
-    `"${String(r.date).replace(/"/g,'""')}"`,
-    `"${String(r.note).replace(/"/g,'""')}"`
-  ].join(','))).join('\n');
-  downloadFile('tolem-kyrys-shygys.csv', csv, 'text/csv;charset=utf-8;');
-}
-function exportPaymentsPDF(){
-  const rows=getFinanceRows();
-  let text='Төлем / Кіріс / Шығыс\n\n';
-  rows.forEach((r,i)=>{
-    text += `${i+1}. ${r.section} | ${r.student} | ${r.amount} | ${r.status} | ${r.date} | ${r.note}\n`;
-  });
-  downloadFile('tolem-kyrys-shygys.pdf', text, 'application/pdf');
-}
-
-</script><style>
-:root{--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb;--primary2:#1d4ed8;--green:#16a34a;--purple:#7c3aed;--shadow:0 18px 40px rgba(15,23,42,.08);--radius:22px}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}.hidden{display:none!important}.app{display:flex;min-height:100vh}.sidebar{width:220px;min-width:220px;background:#0f172a;color:#fff;padding:16px;height:100vh;overflow:auto;position:sticky;top:0}.brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}.logo{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary2));display:grid;place-items:center;font-weight:900}.side-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:18px;padding:14px;margin-bottom:16px}.nav-btn{width:100%;text-align:left;border:none;background:transparent;color:#fff;padding:12px 14px;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;margin-bottom:6px}.nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.1)}.main{flex:1;min-width:0;padding:18px}.topbar,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px;margin-bottom:16px}.card{padding:18px}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.input,.select,.textarea,.btn,.chip{padding:12px 14px;border-radius:14px;border:1px solid var(--line);font:inherit;background:#fff}.input,.select,.textarea{width:100%}.textarea{min-height:96px}.btn{cursor:pointer;font-weight:800}.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none}.btn.green{background:var(--green);color:#fff;border:none}.btn.purple{background:var(--purple);color:#fff;border:none}.hero{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin:16px}.form-row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.section{display:none}.section.active{display:block}
-.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
-#students .card,#payments .card,#branches .card,#crm .card,#groups .card,#journal .card,#progress .card,#staff .card{min-width:0;overflow:hidden}
-#students .form-row,#payments .form-row{align-items:start}
-#students table{min-width:760px;font-size:14px} #payments table{min-width:820px;font-size:14px}
-@media (min-width:981px){
-  .main{min-width:0}
-  #students .card, #payments .card {width:100%}
-}
-table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:12px;border-bottom:1px solid #edf2f7;text-align:left}th{font-size:12px;color:var(--muted);background:#fafcff;text-transform:uppercase}.kpi .label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}.kpi .value{font-size:28px;font-weight:900;margin-top:8px}.search-bar{margin-bottom:14px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day-name,.day-cell{border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}.day-name{font-size:12px;color:var(--muted);font-weight:700;background:#f8fafc}.day-cell{cursor:pointer;min-height:72px}.day-cell.active{outline:2px solid var(--primary);background:#eff6ff}.notice{border:1px dashed rgba(37,99,235,.25);background:rgba(37,99,235,.05);border-radius:16px;padding:12px;font-size:13px;line-height:1.5}@media (max-width:980px){.app{display:block}.sidebar{width:auto;min-width:0;height:auto;position:relative}.hero{grid-template-columns:1fr}.main{padding:12px}}
+<html lang="kk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EduKZ CRM Portal</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+:root{--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb;--primary2:#1d4ed8;--green:#16a34a;--purple:#7c3aed;--shadow:0 18px 40px rgba(15,23,42,.08);--radius:22px}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}.hidden{display:none!important}.app{display:flex;min-height:100vh}.sidebar{width:260px;background:#0f172a;color:#fff;padding:20px;height:100vh;overflow:auto;position:sticky;top:0}.brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}.logo{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary2));display:grid;place-items:center;font-weight:900}.side-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:18px;padding:14px;margin-bottom:16px}.nav-btn{width:100%;text-align:left;border:none;background:transparent;color:#fff;padding:12px 14px;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;margin-bottom:6px}.nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.1)}.main{flex:1;padding:22px}.topbar,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px;margin-bottom:16px}.card{padding:18px}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.input,.select,.textarea,.btn,.chip{padding:12px 14px;border-radius:14px;border:1px solid var(--line);font:inherit;background:#fff}.input,.select,.textarea{width:100%}.textarea{min-height:96px}.btn{cursor:pointer;font-weight:800}.btn.primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none}.btn.green{background:var(--green);color:#fff;border:none}.btn.purple{background:var(--purple);color:#fff;border:none}.hero{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin:16px}.form-row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.section{display:none}.section.active{display:block}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:12px;border-bottom:1px solid #edf2f7;text-align:left}th{font-size:12px;color:var(--muted);background:#fafcff;text-transform:uppercase}.kpi .label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}.kpi .value{font-size:28px;font-weight:900;margin-top:8px}.search-bar{margin-bottom:14px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day-name,.day-cell{border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#fff}.day-name{font-size:12px;color:var(--muted);font-weight:700;background:#f8fafc}.day-cell{cursor:pointer;min-height:72px}.day-cell.active{outline:2px solid var(--primary);background:#eff6ff}.notice{border:1px dashed rgba(37,99,235,.25);background:rgba(37,99,235,.05);border-radius:16px;padding:12px;font-size:13px;line-height:1.5}@media (max-width:980px){.app{display:block}.sidebar{width:auto;height:auto;position:relative}.hero{grid-template-columns:1fr}.main{padding:16px}}
 
 body{overflow-x:hidden}
-.main{max-width:100%;overflow-x:hidden}
-.card{width:100%;box-sizing:border-box}
-.form-row{flex-wrap:wrap}
-input,select{max-width:100%}
+.main{min-width:0;max-width:100%;overflow-x:hidden}
+.sidebar{width:220px;min-width:220px;padding:16px}
+.card{min-width:0;overflow:hidden}
 .table-wrap{overflow-x:auto}
-
-
 #students .form-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
-#students .input,#students .select{padding:10px 12px}
-#students .card{overflow:hidden}
-#students .table-wrap{overflow-x:auto}
-#students th,#students td{white-space:nowrap}
-
+#students th,#students td,#payments th,#payments td{white-space:nowrap}
+#students table{min-width:920px}
+#payments table{min-width:900px}
 </style></head><body>
-<div id="authShell"><div class="hero"><div class="card"><h3>Кіру</h3><div class="form-row" style="flex-wrap:wrap"><input id="loginEmail" class="input" placeholder="Email"><input id="loginPassword" class="input" type="password" placeholder="Құпиясөз"></div><div class="form-row" style="flex-wrap:wrap" style="margin-top:12px"><button id="loginBtn" class="btn primary">Кіру</button><button id="logoutBtnTop" class="btn">Шығу</button></div></div><div class="card"><h3>Директор тіркелуі</h3><div class="form-row" style="flex-wrap:wrap"><input id="suName" class="input" placeholder="Аты-жөні"><input id="suEmail" class="input" placeholder="Email"></div><div class="form-row" style="flex-wrap:wrap" style="margin-top:12px"><input id="suPassword" class="input" type="password" placeholder="Құпиясөз"><input id="suTenant" class="input" placeholder="Орталық атауы"></div><div class="form-row" style="flex-wrap:wrap" style="margin-top:12px"><input id="suCity" class="input" placeholder="Қала"><input id="suDirection" class="input" placeholder="Бағыт"><input id="suBranch" class="input" placeholder="Бас филиал"></div><button id="signUpDirectorBtn" class="btn primary" style="margin-top:12px">Тіркелу</button></div></div><div class="card" style="margin:16px"><h3>Ата-ана кіруі</h3><div class="form-row" style="flex-wrap:wrap"><input id="parentCode" class="input" placeholder="Student code"><input id="parentPin" class="input" placeholder="PIN"><button id="parentLoginBtn" class="btn primary">Кіру</button></div></div></div>
+<div id="authShell"><div class="hero"><div class="card"><h3>Кіру</h3><div class="form-row"><input id="loginEmail" class="input" placeholder="Email"><input id="loginPassword" class="input" type="password" placeholder="Құпиясөз"></div><div class="form-row" style="margin-top:12px"><button id="loginBtn" class="btn primary">Кіру</button><button id="logoutBtnTop" class="btn">Шығу</button></div></div><div class="card"><h3>Директор тіркелуі</h3><div class="form-row"><input id="suName" class="input" placeholder="Аты-жөні"><input id="suEmail" class="input" placeholder="Email"></div><div class="form-row" style="margin-top:12px"><input id="suPassword" class="input" type="password" placeholder="Құпиясөз"><input id="suTenant" class="input" placeholder="Орталық атауы"></div><div class="form-row" style="margin-top:12px"><input id="suCity" class="input" placeholder="Қала"><input id="suDirection" class="input" placeholder="Бағыт"><input id="suBranch" class="input" placeholder="Бас филиал"></div><button id="signUpDirectorBtn" class="btn primary" style="margin-top:12px">Тіркелу</button></div></div><div class="card" style="margin:16px"><h3>Ата-ана кіруі</h3><div class="form-row"><input id="parentCode" class="input" placeholder="Student code"><input id="parentPin" class="input" placeholder="PIN"><button id="parentLoginBtn" class="btn primary">Кіру</button></div></div></div>
 <div id="appShell" class="app hidden"><aside class="sidebar"><div class="brand"><div class="logo">EK</div><div><h1 style="margin:0">EduKZ CRM</h1><p id="sideRole" style="margin:4px 0 0;color:#a5b4fc;font-size:12px">—</p></div></div><div class="side-card"><div id="sideTenant">Орталық: —</div><div id="sideBranch" style="margin-top:6px;color:#cbd5e1">Филиал: —</div></div><button class="nav-btn active" data-section="dashboard">Басты бет</button><button class="nav-btn" data-section="crm">CRM / Лидтер</button><button class="nav-btn" data-section="students">Оқушылар</button><button class="nav-btn" data-section="groups">Топтар</button><button class="nav-btn" data-section="journal">Журнал</button><button class="nav-btn" data-section="payments">Төлем</button><button class="nav-btn" data-section="progress">Прогресс</button><button class="nav-btn" data-section="staff">Қызметкерлер</button><button class="nav-btn" data-section="branches">Филиалдар</button><button class="nav-btn" data-section="owner">Ие панелі</button><button class="nav-btn" data-section="parent">Ата-ана панелі</button></aside><main class="main"><div class="topbar"><div><h2 id="pageTitle" style="margin:0 0 4px;font-size:30px">Басты бет</h2><p id="pageSub" style="margin:0;color:#6b7280">Жалпы аналитика</p></div><div><span class="chip" id="tenantChip">Орталық: —</span> <span class="chip" id="branchChip">Филиал: —</span> <button id="logoutBtn" class="btn">Шығу</button></div></div>
 <section id="dashboard" class="section active"><div class="grid g4" id="dashboardKpis"></div></section>
-<section id="crm" class="section"><div class="card"><h3>Лид қосу</h3><div class="form-row" style="flex-wrap:wrap"><input id="leadName" class="input" placeholder="Аты"><input id="leadPhone" class="input" placeholder="Телефон"><input id="leadDirection" class="input" placeholder="Бағыт"><select id="leadSource" class="select"><option>Instagram</option><option></option><option>TikTok</option><option>Ұсыныс</option></select><select id="leadStage" class="select"><option>Жаңа клиент</option><option>Ойлап жүр</option><option>Пробный</option><option>Клиент болды</option></select></div><textarea id="leadNote" class="textarea" placeholder="Ескерту"></textarea><button id="saveLeadBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="leadSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Аты</th><th>Телефон</th><th>Бағыт</th><th>Қайдан</th><th>Кезең</th><th>Ескерту</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="leadsBody"></tbody></table></div></div><div class="card"><h3>Клиентке дожим хабарламасы</h3><div class="form-row" style="flex-wrap:wrap"><input id="crmMsgPhone" class="input" placeholder=" нөмірі"><input id="crmMsgName" class="input" placeholder="Клиент аты"></div><textarea id="crmMsgBody" class="textarea" placeholder="Сәлеметсіз бе! Пробный сабақ туралы шешім қабылдадыңыз ба?"></textarea><button id="crmMsgSend" class="btn purple"> ашу</button></div></section>
-<section id="students" class="section"><div class="card"><h3>Оқушы тіркеу</h3><div class="form-row" style="flex-wrap:wrap"><input id="studentName" class="input" placeholder="Аты-жөні"><input id="studentParent" class="input" placeholder="Ата-ана аты"><input id="studentPhone" class="input" placeholder="Телефон"><input id="studentDirection" class="input" placeholder="Бағыт"><input id="studentCode" class="input" placeholder="Student code"><input id="studentPin" class="input" placeholder="PIN"><input id="studentBirthDate" class="input" type="date"><input id="studentAge" class="input" readonly placeholder="Жасы автоматты"><input id="studentFee" class="input" type="number" placeholder="Айлық төлем"><input id="studentNextPayment" class="input" type="date" title=" күні"><select id="studentBranch" class="select"></select></div><button id="saveStudentBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="studentSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Оқушы</th><th>Ата-ана</th><th>Бағыт</th><th>Туған күні</th><th>Жасы</th><th>Айлық төлем</th><th></th><th></th><th></th><th>Статус</th><th>Қарыз</th><th>Сақтау</th><th>Төлем</th><th>Тарих</th><th></th><th>Өшіру</th></tr></thead><tbody id="studentsBody"></tbody></table></div></div></section>
-<section id="groups" class="section"><div class="card"><h3>Топ қосу</h3><div class="form-row" style="flex-wrap:wrap"><input id="groupName" class="input" placeholder="Топ атауы"><input id="groupDirection" class="input" placeholder="Бағыт"><input id="groupTeacherName" class="input" placeholder="Мұғалім аты"><input id="groupSchedule" class="input" placeholder="Кесте"><input id="groupRoom" class="input" placeholder="Аудитория"><select id="groupBranch" class="select"></select></div><button id="saveGroupBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="groupSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Топ</th><th>Бағыт</th><th>Мұғалім</th><th>Кесте</th><th>Аудитория</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="groupsBody"></tbody></table></div></div></section>
-<section id="journal" class="section"><div class="grid g2"><div class="card"><h3>Журналға жазу</h3><div class="form-row" style="flex-wrap:wrap"><select id="attGroup" class="select"></select><select id="attStudent" class="select"></select><input id="attDate" class="input" type="date"><input id="attTopic" class="input" placeholder="Тақырып"><select id="attStatus" class="select"><option>Келді</option><option>Келмеді</option><option>Кешікті</option><option>Себепті</option></select><input id="attHomework" class="input" placeholder="Үй тапсырмасы"></div><textarea id="attComment" class="textarea" placeholder="Мұғалім пікірі"></textarea><button id="saveAttendanceBtn" class="btn primary">Сақтау</button></div><div class="card"><h3>Күнтізбе бойынша қатысу</h3><div class="form-row" style="flex-wrap:wrap"><select id="monthSelect" class="select"></select><select id="yearSelect" class="select"></select></div><div class="calendar-grid" id="calendarGrid"></div><div style="margin-top:14px"><strong id="selectedDateLabel">—</strong><div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Оқушы</th><th>Топ</th><th>Статус</th></tr></thead><tbody id="dayAttendanceBody"></tbody></table></div></div></div></div><div class="card" style="margin-top:16px"><input id="attendanceSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Күн</th><th>Оқушы</th><th>Тақырып</th><th>Қатысу</th><th>Үй тапсырмасы</th><th>Пікір</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="attendanceBody"></tbody></table></div></div></section>
-
-<section id="payments" class="section">
-  <div class="grid g2">
-    <div class="card">
-      <h3>Төлем енгізу</h3>
-      <div class="form-row" style="flex-wrap:wrap">
-        <select id="paymentStudent" class="select"></select>
-        <input id="paymentPaidAt" class="input" type="date" placeholder="Төлеген күні">
-        <input id="paymentDueDate" class="input" type="date" placeholder=" күні">
-        <input id="paymentAmount" class="input" type="number" placeholder="Төленген сома">
-        <input id="paymentDiscount" class="input" type="number" placeholder="Жеңілдік">
-        <input id="paymentMonth" class="input" placeholder="Қай ай үшін (2026-03)">
-      </div>
-      <textarea id="paymentNote" class="textarea" placeholder="Ескерту"></textarea>
-      <div class="form-row" style="flex-wrap:wrap">
-        <button id="savePaymentBtn" class="btn primary">Төлемді сақтау</button>
-        <button id="openStudentPaymentBtn" class="btn">Оқушыны ашу</button>
-      </div>
-      <p style="margin:12px 0 0;color:#6b7280">Төлем енгізілгенде ол автоматты түрде кассаға кіріс болып түседі. Оқушы карточкасында соңғы төлем, келесі төлем, қарыз және статус жаңарады.</p>
-    </div>
-    <div class="card">
-      <h3>Ата-анаға  хабарлама</h3>
-      <div class="form-row" style="flex-wrap:wrap">
-        <select id="noticeStudent" class="select"></select>
-        <select id="noticeType" class="select">
-          <option>Төлем уақыты келді</option>
-          <option>Қарыз қалды</option>
-          <option>Сабаққа келмеді</option>
-        </select>
-      </div>
-      <textarea id="noticeBody" class="textarea" placeholder=" мәтіні"></textarea>
-      <div class="form-row" style="flex-wrap:wrap">
-        <button id="sendBtn" class="btn purple"> ашу</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:16px">
-    <h3>Төлем тарихы</h3>
-    <input id="paymentSearch" class="input search-bar" placeholder="Оқушы немесе ай бойынша іздеу...">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Оқушы</th><th>Ай</th><th>Төлеген күні</th><th>Төленді</th><th>Жеңілдік</th><th>Қарыз</th><th></th><th>Статус</th><th>Ескерту</th></tr>
-        </thead>
-        <tbody id="paymentsBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="grid g2" style="margin-top:16px">
-    <div class="card"><h3>Кіріс / Шығыс</h3><p style="margin:0 0 12px;color:#6b7280">Бұл жерде төлемнен және шығыстан түскен қозғалыс қана көрінеді. Қате болса өзгертуге немесе өшіруге болады.</p><div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Түрі</th><th>Категория</th><th>Кімге/кімнен</th><th>Сома</th><th>Күні</th><th>Ескерту</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="cashboxBody"></tbody></table></div></div><div class="card"><h3>Жалақы / Шығыс</h3>
-      <div class="form-row" style="flex-wrap:wrap">
-        <input id="salaryPerson" class="input" placeholder="Кімге">
-        <input id="salaryPosition" class="input" placeholder="Лауазымы">
-        <input id="salaryMonth" class="input" placeholder="Қай ай үшін">
-        <input id="salaryAmount" class="input" type="number" placeholder="Сома">
-        <input id="salaryDate" class="input" type="date">
-      </div>
-      <textarea id="salaryNote" class="textarea" placeholder="Ескерту"></textarea>
-      <div class="form-row" style="flex-wrap:wrap">
-        <button id="saveSalaryBtn" class="btn primary">Жалақы сақтау</button>
-        <input id="expenseName" class="input" placeholder="Шығыс атауы">
-        <input id="expenseCategory" class="input" placeholder="Шығыс категориясы">
-        <input id="expensePerson" class="input" placeholder="Кімге берілді">
-        <input id="expenseAmount" class="input" type="number" placeholder="Сома">
-        <input id="expenseDate" class="input" type="date">
-      </div>
-      <textarea id="expenseNote" class="textarea" placeholder="Шығыс комментарий"></textarea>
-      <button id="saveExpenseBtn" class="btn">Шығыс сақтау</button>
-    </div>
-  </div>
-</section>
-<section id="progress" class="section"><div class="grid g2"><div class="card"><h3>Прогресс енгізу</h3><div class="form-row" style="flex-wrap:wrap"><select id="progStudent" class="select"></select><input id="progHomework" class="input" placeholder="Үй тапсырмасы"><input id="progScore" class="input" type="number" placeholder="Тест балы"><select id="progStatus" class="select"><option>Төмен</option><option>Орташа</option><option>Жақсы</option><option>Өте жақсы</option></select></div><textarea id="progComment" class="textarea" placeholder="Мұғалім пікірі"></textarea><button id="saveProgBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="progSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Оқушы</th><th>Үй тапсырмасы</th><th>Тест</th><th>Прогресс</th><th>Пікір</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="progressBody"></tbody></table></div></div></div></section>
-<section id="staff" class="section"><div class="grid g2"><div class="card"><h3>Қызметкер шақыру</h3><div class="form-row" style="flex-wrap:wrap"><input id="inviteName" class="input" placeholder="Аты"><input id="inviteEmail" class="input" placeholder="Email"><select id="inviteRole" class="select"><option>admin</option><option>accountant</option><option>marketing</option><option>teacher</option><option>parent</option></select><input id="invitePassword" class="input" placeholder="Уақытша пароль"><select id="inviteBranch" class="select"></select></div><button id="saveInviteBtn" class="btn primary">Сақтау</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Аты</th><th>Email</th><th>Рөлі</th><th>Филиал</th></tr></thead><tbody id="profilesBody"></tbody></table></div></div></div></section>
-<section id="branches" class="section"><div class="grid g2"><div class="card"><h3>Филиал қосу</h3><div class="form-row" style="flex-wrap:wrap"><input id="branchName" class="input" placeholder="Филиал атауы"><input id="branchCity" class="input" placeholder="Қала"><input id="branchAddress" class="input" placeholder="Мекенжай"><input id="branchPhone" class="input" placeholder="Телефон"></div><button id="saveBranchBtn" class="btn primary">Сақтау</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Атауы</th><th>Қала</th><th>Мекенжай</th><th>Телефон</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="branchesBody"></tbody></table></div></div></div></section>
+<section id="crm" class="section"><div class="card"><h3>Лид қосу</h3><div class="form-row"><input id="leadName" class="input" placeholder="Аты"><input id="leadPhone" class="input" placeholder="Телефон"><input id="leadDirection" class="input" placeholder="Бағыт"><select id="leadSource" class="select"><option>Instagram</option><option>WhatsApp</option><option>TikTok</option><option>Ұсыныс</option></select><select id="leadStage" class="select"><option>Жаңа клиент</option><option>Ойлап жүр</option><option>Пробный</option><option>Клиент болды</option></select></div><textarea id="leadNote" class="textarea" placeholder="Ескерту"></textarea><button id="saveLeadBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="leadSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Аты</th><th>Телефон</th><th>Бағыт</th><th>Қайдан</th><th>Кезең</th><th>Ескерту</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="leadsBody"></tbody></table></div></div><div class="card"><h3>Клиентке дожим хабарламасы</h3><div class="form-row"><input id="crmMsgPhone" class="input" placeholder="WhatsApp нөмірі"><input id="crmMsgName" class="input" placeholder="Клиент аты"></div><textarea id="crmMsgBody" class="textarea" placeholder="Сәлеметсіз бе! Пробный сабақ туралы шешім қабылдадыңыз ба?"></textarea><button id="crmMsgSend" class="btn purple">WhatsApp ашу</button></div></section>
+<section id="students" class="section"><div class="card"><h3>Оқушы тіркеу</h3><div class="form-row"><input id="studentName" class="input" placeholder="Аты-жөні"><input id="studentParent" class="input" placeholder="Ата-ана аты"><input id="studentPhone" class="input" placeholder="Телефон"><input id="studentDirection" class="input" placeholder="Бағыт"><input id="studentCode" class="input" placeholder="Student code"><input id="studentPin" class="input" placeholder="PIN"><input id="studentBirthDate" class="input" type="date"><input id="studentAge" class="input" readonly placeholder="Жасы автоматты"><input id="studentFee" class="input" type="number" placeholder="Айлық төлем"><input id="studentNextPayment" class="input" type="date" title="Келесі төлем күні"><select id="studentBranch" class="select"></select></div><button id="saveStudentBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="studentSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Оқушы</th><th>Ата-ана</th><th>Бағыт</th><th>Туған күні</th><th>Жасы</th><th>Код</th><th>PIN</th><th>Айлық төлем</th><th>Статус</th><th>Қарыз</th><th>Сақтау</th><th>Төлем</th><th>Тарих</th><th>Өшіру</th></tr></thead><tbody id="studentsBody"></tbody></table></div></div></section>
+<section id="groups" class="section"><div class="card"><h3>Топ қосу</h3><div class="form-row"><input id="groupName" class="input" placeholder="Топ атауы"><input id="groupDirection" class="input" placeholder="Бағыт"><input id="groupTeacherName" class="input" placeholder="Мұғалім аты"><input id="groupSchedule" class="input" placeholder="Кесте"><input id="groupRoom" class="input" placeholder="Аудитория"><select id="groupBranch" class="select"></select></div><button id="saveGroupBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="groupSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Топ</th><th>Бағыт</th><th>Мұғалім</th><th>Кесте</th><th>Аудитория</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="groupsBody"></tbody></table></div></div></section>
+<section id="journal" class="section"><div class="grid g2"><div class="card"><h3>Журналға жазу</h3><div class="form-row"><select id="attGroup" class="select"></select><select id="attStudent" class="select"></select><input id="attDate" class="input" type="date"><input id="attTopic" class="input" placeholder="Тақырып"><select id="attStatus" class="select"><option>Келді</option><option>Келмеді</option><option>Кешікті</option><option>Себепті</option></select><input id="attHomework" class="input" placeholder="Үй тапсырмасы"></div><textarea id="attComment" class="textarea" placeholder="Мұғалім пікірі"></textarea><button id="saveAttendanceBtn" class="btn primary">Сақтау</button></div><div class="card"><h3>Күнтізбе бойынша қатысу</h3><div class="form-row"><select id="monthSelect" class="select"></select><select id="yearSelect" class="select"></select></div><div class="calendar-grid" id="calendarGrid"></div><div style="margin-top:14px"><strong id="selectedDateLabel">—</strong><div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Оқушы</th><th>Топ</th><th>Статус</th></tr></thead><tbody id="dayAttendanceBody"></tbody></table></div></div></div></div><div class="card" style="margin-top:16px"><input id="attendanceSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Күн</th><th>Оқушы</th><th>Тақырып</th><th>Қатысу</th><th>Үй тапсырмасы</th><th>Пікір</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="attendanceBody"></tbody></table></div></div></section>
+<section id="payments" class="section"><div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px"><button class="btn" onclick="exportPaymentsExcel()">Excel жүктеу</button><button class="btn" onclick="exportPaymentsPDF()">PDF жүктеу</button></div><div class="grid g2"><div class="card"><h3>Төлемдер</h3><p style="margin:0 0 12px;color:#6b7280">Төлем енгізілгенде ол автоматты түрде кассаға кіріс болып түсуі керек. Оқушы карточкасында соңғы төлем, келесі төлем, қарыз және статус жаңарып отырады.</p><div class="table-wrap"><table><thead><tr><th>Оқушы</th><th>Ай</th><th>Төленді</th><th>Жеңілдік</th><th>Қарыз</th><th>Келесі төлем</th><th>Статус</th></tr></thead><tbody id="paymentsBody"></tbody></table></div></div><div class="card"><h3>Ата-анаға WhatsApp хабарлама</h3><div class="form-row"><select id="noticeStudent" class="select"></select><select id="noticeType" class="select"><option>Төлем уақыты келді</option><option>Қарыз қалды</option><option>Сабаққа келмеді</option></select></div><textarea id="noticeBody" class="textarea" placeholder="WhatsApp мәтіні"></textarea><div class="form-row"><button id="sendWhatsAppBtn" class="btn purple">WhatsApp ашу</button></div></div></div><div class="card" style="margin-top:16px"><h3>Касса</h3><div class="form-row"><select id="cashType" class="select"><option>Кіріс</option><option>Шығыс</option><option>Жалақы</option></select><input id="cashAmount" class="input" type="number" placeholder="Сома"><input id="cashDate" class="input" type="date"></div><textarea id="cashNote" class="textarea" placeholder="Ескерту"></textarea><button id="saveCashBtn" class="btn primary">Сақтау</button></div></section>
+<section id="progress" class="section"><div class="grid g2"><div class="card"><h3>Прогресс енгізу</h3><div class="form-row"><select id="progStudent" class="select"></select><input id="progHomework" class="input" placeholder="Үй тапсырмасы"><input id="progScore" class="input" type="number" placeholder="Тест балы"><select id="progStatus" class="select"><option>Төмен</option><option>Орташа</option><option>Жақсы</option><option>Өте жақсы</option></select></div><textarea id="progComment" class="textarea" placeholder="Мұғалім пікірі"></textarea><button id="saveProgBtn" class="btn primary">Сақтау</button></div><div class="card"><input id="progSearch" class="input search-bar" placeholder="Іздеу..."><div class="table-wrap"><table><thead><tr><th>Оқушы</th><th>Үй тапсырмасы</th><th>Тест</th><th>Прогресс</th><th>Пікір</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="progressBody"></tbody></table></div></div></div></section>
+<section id="staff" class="section"><div class="grid g2"><div class="card"><h3>Қызметкер шақыру</h3><div class="form-row"><input id="inviteName" class="input" placeholder="Аты"><input id="inviteEmail" class="input" placeholder="Email"><select id="inviteRole" class="select"><option>admin</option><option>accountant</option><option>marketing</option><option>teacher</option><option>parent</option></select><input id="invitePassword" class="input" placeholder="Уақытша пароль"><select id="inviteBranch" class="select"></select></div><button id="saveInviteBtn" class="btn primary">Сақтау</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Аты</th><th>Email</th><th>Рөлі</th><th>Филиал</th></tr></thead><tbody id="profilesBody"></tbody></table></div></div></div></section>
+<section id="branches" class="section"><div class="grid g2"><div class="card"><h3>Филиал қосу</h3><div class="form-row"><input id="branchName" class="input" placeholder="Филиал атауы"><input id="branchCity" class="input" placeholder="Қала"><input id="branchAddress" class="input" placeholder="Мекенжай"><input id="branchPhone" class="input" placeholder="Телефон"></div><button id="saveBranchBtn" class="btn primary">Сақтау</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Атауы</th><th>Қала</th><th>Мекенжай</th><th>Телефон</th><th>Сақтау</th><th>Өшіру</th></tr></thead><tbody id="branchesBody"></tbody></table></div></div></div></section>
 <section id="owner" class="section"><div class="grid g4" id="ownerKpis"></div><div class="card" style="margin-top:16px"><div class="table-wrap"><table><thead><tr><th>Орталық</th><th>Қала</th><th>Бағыт</th><th>Статус</th><th>Құрылған</th></tr></thead><tbody id="tenantsBody"></tbody></table></div></div></section>
 <section id="parent" class="section"><div class="grid g4" id="parentKpis"></div><div class="grid g2" style="margin-top:16px"><div class="card"><h3>Бала туралы</h3><div class="table-wrap"><table><tbody id="parentInfoBody"></tbody></table></div></div><div class="card"><h3>Келген / келмеген күндер</h3><div class="table-wrap"><table><thead><tr><th>Күні</th><th>Статус</th><th>Тақырып</th></tr></thead><tbody id="parentNoticesBody"></tbody></table></div></div></div></section>
 </main></div>
@@ -170,37 +34,27 @@ const titles={dashboard:['Басты бет','Жалпы аналитика'],cr
 const roleSections={director:['dashboard','crm','students','groups','journal','payments','progress','staff','branches'],admin:['dashboard','students','groups','journal','payments','staff','branches'],accountant:['dashboard','payments'],marketing:['dashboard','crm'],teacher:['dashboard','groups','journal','progress'],parent:['parent'],owner:['owner']};
 const val=id=>document.getElementById(id).value.trim(); const money=v=>`${Number(v||0).toLocaleString('ru-RU')} ₸`; const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function ageFromDate(d){if(!d) return ''; const dob=new Date(d), t=new Date(); let a=t.getFullYear()-dob.getFullYear(); const m=t.getMonth()-dob.getMonth(); if(m<0||(m===0&&t.getDate()<dob.getDate())) a--; return a;}
-function addOneMonth(dateStr){if(!dateStr) return ''; const d=new Date(dateStr); if(isNaN(d)) return ''; d.setMonth(d.getMonth()+1); return d.toISOString().slice(0,10);}
-function fmtMonth(dateStr){const d=dateStr?new Date(dateStr):new Date(); if(isNaN(d)) return ''; return d.toISOString().slice(0,7);}
-function computeDebt(monthly, paid, discount){return Math.max(Number(monthly||0)-Number(paid||0)-Number(discount||0),0);}
-function computeStatus(monthly, paid, discount){const debt=computeDebt(monthly,paid,discount); if(Number(paid||0)<=0) return 'Төлемеді'; if(debt>0) return 'Жартылай'; return 'Төледі';}
-function tenantId(){return profile?.tenant_id || data.tenants[0]?.id || null}
-function branchIdDefault(){return profile?.branch_id || data.branches[0]?.id || null}
-function openPaymentForStudent(studentId){document.getElementById('paymentStudent').value=studentId; const st=data.students.find(x=>x.id===studentId); if(st){document.getElementById('paymentAmount').value=st.monthly_fee||0; document.getElementById('paymentDueDate').value=st.next_payment_date||''; document.getElementById('paymentMonth').value=fmtMonth(st.next_payment_date||new Date().toISOString().slice(0,10)); const msg=`Сәлеметсіз бе! ${st.full_name} үшін төлем күні ${st.next_payment_date||'жақындап қалды'}. Төлеу керек сома: ${money(st.debt_amount||st.monthly_fee||0)}.`; document.getElementById('noticeStudent').value=st.id; document.getElementById('noticeBody').value=msg;} setSection('payments');}
-function showPaymentHistory(studentId){const st=data.students.find(x=>x.id===studentId); document.getElementById('paymentSearch').value=st?.full_name||''; setSection('payments'); renderPayments();renderCashbox();}
-function messageForStudent(studentId, type){const st=data.students.find(x=>x.id===studentId); if(!st) return ''; const amount=st.debt_amount||st.monthly_fee||0; if(type==='Қарыз қалды') return `Сәлеметсіз бе! ${st.full_name} бойынша қарыз бар: ${money(amount)}.  күні: ${st.next_payment_date||'—'}.`; if(type==='Сабаққа келмеді') return `Сәлеметсіз бе! ${st.full_name} бүгін сабаққа келмеді.`; return `Сәлеметсіз бе! ${st.full_name} үшін төлем күні: ${st.next_payment_date||'—'}. Төлеу керек сома: ${money(amount)}.`;}
-function setSection(id){if(profile?.role==='parent'&&id!=='parent'){id='parent';}document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.section===id));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=titles[id][0];document.getElementById('pageSub').textContent=titles[id][1];}
+function setSection(id){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.section===id));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id));document.getElementById('pageTitle').textContent=titles[id][0];document.getElementById('pageSub').textContent=titles[id][1];}
 document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=()=>setSection(btn.dataset.section));
 function applyRoleView(role){const allowed=roleSections[role]||['dashboard'];document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.toggle('hidden',!allowed.includes(btn.dataset.section)));setSection(role==='parent'?'parent':allowed[0]);}
 async function signUpDirector(){const full_name=val('suName'),email=val('suEmail'),password=val('suPassword'),tenantName=val('suTenant'),city=val('suCity'),direction=val('suDirection'),branchName=val('suBranch')||'Бас филиал';if(!email||!password||!tenantName)return alert('Міндетті өрістерді толтыр');const auth=await sb.auth.signUp({email,password});if(auth.error)return alert(auth.error.message);const userId=auth.data.user?.id||auth.data.session?.user?.id;if(!userId)return alert('Confirm email OFF қыл.');const tenant=await sb.from('tenants').insert({name:tenantName,slug:tenantName.toLowerCase().replace(/\s+/g,'-'),city,direction,status:'trial',owner_user_id:userId}).select().single();if(tenant.error)return alert(tenant.error.message);const branch=await sb.from('branches').insert({tenant_id:tenant.data.id,name:branchName,city}).select().single();if(branch.error)return alert(branch.error.message);const p=await sb.from('profiles').insert({user_id:userId,tenant_id:tenant.data.id,branch_id:branch.data.id,full_name,email,role:'director',status:'active'});if(p.error)return alert(p.error.message);const plan=await sb.from('plans').select('*').eq('code','start').maybeSingle();await sb.from('subscriptions').insert({tenant_id:tenant.data.id,plan_id:plan.data?.id||null,billing_cycle:'monthly',amount:plan.data?.monthly_price||0,status:'trial',note:'director signup'});await sb.from('invoices').insert({tenant_id:tenant.data.id,period_label:'Trial',amount:plan.data?.monthly_price||0,status:'unpaid'});alert('Тіркелді. Енді кіру батырмасын бас.');}
 async function login(){const auth=await sb.auth.signInWithPassword({email:val('loginEmail'),password:val('loginPassword')});if(auth.error)return alert(auth.error.message);await bootstrap();}
 async function bootstrap(){const s=await sb.auth.getSession();session=s.data.session;if(!session)return;const p=await sb.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle();if(p.error)return alert(p.error.message);if(!p.data)return alert('profiles кестесінде user табылмады');profile=p.data;parentStudent=null;await loadAll();openApp();}
 async function parentLogin(){const st=await sb.from('students').select('*').eq('student_code',val('parentCode')).eq('pin_code',val('parentPin')).maybeSingle();if(st.error)return alert(st.error.message);if(!st.data)return alert('Student code немесе PIN қате');parentStudent=st.data;profile={role:'parent',tenant_id:st.data.tenant_id,branch_id:st.data.branch_id,full_name:st.data.parent_name||'Ата-ана'};await loadAll();openApp();}
-async function loadAll(){const rs=await Promise.all([sb.from('tenants').select('*').order('created_at',{ascending:false}),sb.from('branches').select('*').order('created_at',{ascending:false}),sb.from('profiles').select('*').order('created_at',{ascending:false}),sb.from('students').select('*').order('created_at',{ascending:false}),sb.from('groups').select('*').order('created_at',{ascending:false}),sb.from('leads').select('*').order('created_at',{ascending:false}),sb.from('payments').select('*').order('created_at',{ascending:false}),sb.from('attendance_journal').select('*').order('lesson_date',{ascending:false}),sb.from('education_records').select('*').order('created_at',{ascending:false}),sb.from('notifications').select('*').order('created_at',{ascending:false}),sb.from('cashbox_entries').select('*').order('entry_date',{ascending:false})]);[data.tenants,data.branches,data.profiles,data.students,data.groups,data.leads,data.payments,data.attendance,data.progress,data.notifications,data.cashbox_entries]=rs.map(x=>x.data||[])}
+async function loadAll(){const rs=await Promise.all([sb.from('tenants').select('*').order('created_at',{ascending:false}),sb.from('branches').select('*').order('created_at',{ascending:false}),sb.from('profiles').select('*').order('created_at',{ascending:false}),sb.from('students').select('*').order('created_at',{ascending:false}),sb.from('groups').select('*').order('created_at',{ascending:false}),sb.from('leads').select('*').order('created_at',{ascending:false}),sb.from('payments').select('*').order('created_at',{ascending:false}),sb.from('attendance_journal').select('*').order('lesson_date',{ascending:false}),sb.from('education_records').select('*').order('created_at',{ascending:false}),sb.from('notifications').select('*').order('created_at',{ascending:false})]);[data.tenants,data.branches,data.profiles,data.students,data.groups,data.leads,data.payments,data.attendance,data.progress,data.notifications]=rs.map(x=>x.data||[])}
 function openApp(){document.getElementById('authShell').classList.add('hidden');document.getElementById('appShell').classList.remove('hidden');const tenant=data.tenants.find(t=>t.id===profile.tenant_id)||{},branch=data.branches.find(b=>b.id===profile.branch_id)||{};document.getElementById('sideRole').textContent='Рөл: '+profile.role;document.getElementById('sideTenant').textContent='Орталық: '+(tenant.name||'—');document.getElementById('sideBranch').textContent='Филиал: '+(branch.name||'—');document.getElementById('tenantChip').textContent='Орталық: '+(tenant.name||'—');document.getElementById('branchChip').textContent='Филиал: '+(branch.name||'—');applyRoleView(profile.role);renderAll();}
-function renderAll(){document.getElementById('dashboardKpis').innerHTML=[[ 'Оқушылар', (profile.role==='parent'?[parentStudent]:data.students).length ],['Топтар',data.groups.length],['Қарыз',money((profile.role==='parent'?data.payments.filter(p=>p.student_id===parentStudent.id):data.payments).reduce((a,b)=>a+Number(b.debt_amount||0),0))],['Лидтер',data.leads.length]].map(x=>`<div class="card kpi"><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join(''); renderLeads();renderStudents();renderGroups();renderAttendance();renderPayments();renderCashbox();renderProgress();renderProfiles();renderBranches();renderOwner();renderParent();fillSelects();renderCalendar();}
+function renderAll(){document.getElementById('dashboardKpis').innerHTML=[[ 'Оқушылар', (profile.role==='parent'?[parentStudent]:data.students).length ],['Топтар',data.groups.length],['Қарыз',money((profile.role==='parent'?data.payments.filter(p=>p.student_id===parentStudent.id):data.payments).reduce((a,b)=>a+Number(b.debt_amount||0),0))],['Лидтер',data.leads.length]].map(x=>`<div class="card kpi"><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join(''); renderLeads();renderStudents();renderGroups();renderAttendance();renderPayments();renderProgress();renderProfiles();renderBranches();renderOwner();renderParent();fillSelects();renderCalendar();}
 function renderLeads(){const q=(document.getElementById('leadSearch').value||'').toLowerCase();document.getElementById('leadsBody').innerHTML=data.leads.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<tr><td contenteditable="true" data-col="full_name">${esc(x.full_name)}</td><td contenteditable="true" data-col="phone">${esc(x.phone)}</td><td contenteditable="true" data-col="direction">${esc(x.direction)}</td><td contenteditable="true" data-col="source">${esc(x.source)}</td><td contenteditable="true" data-col="stage">${esc(x.stage)}</td><td contenteditable="true" data-col="manager_note">${esc(x.manager_note)}</td><td><button class="btn green" onclick="updateRow('leads','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('leads','${x.id}')">Өшіру</button></td></tr>`).join('')}
 function renderStudents(){
-const rows=profile.role==='parent'?[parentStudent]:data.students,
-q=(document.getElementById('studentSearch').value||'').toLowerCase();
+const rows=profile.role==='parent'?[parentStudent]:data.students,q=(document.getElementById('studentSearch').value||'').toLowerCase();
 document.getElementById('studentsBody').innerHTML=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<tr>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="full_name">${esc(x.full_name)}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="parent_name">${esc(x.parent_name)}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="direction">${esc(x.direction)}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="birth_date">${esc(x.birth_date||'')}</td>
-<td>${esc(x.student_code||x.code||'')}</td>
-<td>${esc(x.pin||x.pin_code||'')}</td>
 <td>${ageFromDate(x.birth_date)||''}</td>
+<td>${esc(x.student_code||'')}</td>
+<td>${esc(x.pin_code||'')}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="monthly_fee">${x.monthly_fee||0}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="payment_status">${esc(x.payment_status||'Төлемеді')}</td>
 <td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="debt_amount">${x.debt_amount||0}</td>
@@ -209,22 +63,7 @@ ${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('
 }
 function renderGroups(){const q=(document.getElementById('groupSearch').value||'').toLowerCase();document.getElementById('groupsBody').innerHTML=data.groups.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>`<tr><td contenteditable="true" data-col="name">${esc(x.name)}</td><td contenteditable="true" data-col="direction">${esc(x.direction)}</td><td contenteditable="true" data-col="teacher_name">${esc(x.teacher_name)}</td><td contenteditable="true" data-col="schedule">${esc(x.schedule)}</td><td contenteditable="true" data-col="room">${esc(x.room)}</td><td><button class="btn green" onclick="updateRow('groups','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('groups','${x.id}')">Өшіру</button></td></tr>`).join('')}
 function renderAttendance(){const rows=profile.role==='parent'?data.attendance.filter(x=>x.student_id===parentStudent.id):data.attendance,q=(document.getElementById('attendanceSearch').value||'').toLowerCase();document.getElementById('attendanceBody').innerHTML=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="lesson_date">${esc(x.lesson_date)}</td><td>${esc(st?.full_name||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="topic">${esc(x.topic)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="attendance_status">${esc(x.attendance_status)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="homework">${esc(x.homework)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="teacher_comment">${esc(x.teacher_comment||'')}</td>${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('attendance_journal','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('attendance_journal','${x.id}')">Өшіру</button></td>`}</tr>`}).join('')}
-function renderPayments(){const q=(document.getElementById('paymentSearch')?.value||'').toLowerCase();const rows=(profile.role==='parent'?data.payments.filter(x=>x.student_id===parentStudent.id):data.payments).filter(x=>{const st=data.students.find(s=>s.id===x.student_id); return JSON.stringify({...x,student_name:st?.full_name||''}).toLowerCase().includes(q);}).sort((a,b)=>String(b.paid_at||b.created_at||'').localeCompare(String(a.paid_at||a.created_at||'')));document.getElementById('paymentsBody').innerHTML=rows.map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td>${esc(st?.full_name||'')}</td><td>${esc(x.billing_month||'')}</td><td>${esc(x.paid_at||'')}</td><td>${money(x.paid_amount||0)}</td><td>${money(x.discount_amount||0)}</td><td>${money(x.debt_amount||0)}</td><td>${esc(st?.next_payment_date||x.due_date||'')}</td><td>${esc(x.payment_status||'')}</td><td>${esc(x.note||'')}</td></tr>`}).join('')}
-function renderCashbox(){
-const body=document.getElementById('cashboxBody');
-if(!body) return;
-const rows=(data.cashbox_entries||data.cashbox||[]).slice().sort((a,b)=>String(b.entry_date||b.created_at||'').localeCompare(String(a.entry_date||a.created_at||'')));
-body.innerHTML=rows.map(x=>`<tr>
-<td contenteditable="true" data-col="entry_type">${esc(x.entry_type||'')}</td>
-<td contenteditable="true" data-col="category">${esc(x.category||'')}</td>
-<td contenteditable="true" data-col="person_name">${esc(x.person_name||'')}</td>
-<td contenteditable="true" data-col="amount">${x.amount||0}</td>
-<td contenteditable="true" data-col="entry_date">${esc(x.entry_date||'')}</td>
-<td contenteditable="true" data-col="note">${esc(x.note||'')}</td>
-<td><button class="btn green" onclick="updateRow('cashbox_entries','${x.id}',this)">Сақтау</button></td>
-<td><button class="btn" onclick="deleteRow('cashbox_entries','${x.id}')">Өшіру</button></td>
-</tr>`).join('');
-}
+function renderPayments(){const rows=profile.role==='parent'?data.payments.filter(x=>x.student_id===parentStudent.id):data.payments;document.getElementById('paymentsBody').innerHTML=rows.map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td>${esc(st?.full_name||'')}</td><td>${esc(x.billing_month||'')}</td><td>${money(x.paid_amount||0)}</td><td>${money(x.discount_amount||0)}</td><td>${money(x.debt_amount||0)}</td><td>${esc(st?.next_payment_date||'')}</td><td>${esc(x.payment_status||'')}</td></tr>`}).join('')}
 function renderProgress(){const rows=profile.role==='parent'?data.progress.filter(x=>x.student_id===parentStudent.id):data.progress,q=(document.getElementById('progSearch').value||'').toLowerCase();document.getElementById('progressBody').innerHTML=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).map(x=>{const st=data.students.find(s=>s.id===x.student_id);return `<tr><td>${esc(st?.full_name||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="homework">${esc(x.homework)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="test_score">${esc(x.test_score||'')}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="progress_status">${esc(x.progress_status)}</td><td contenteditable="${profile.role==='parent'?'false':'true'}" data-col="teacher_comment">${esc(x.teacher_comment)}</td>${profile.role==='parent'?'':`<td><button class="btn green" onclick="updateRow('education_records','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('education_records','${x.id}')">Өшіру</button></td>`}</tr>`}).join('')}
 function renderProfiles(){document.getElementById('profilesBody').innerHTML=data.profiles.map(x=>{const b=data.branches.find(y=>y.id===x.branch_id);return `<tr><td>${esc(x.full_name)}</td><td>${esc(x.email)}</td><td>${esc(x.role)}</td><td>${esc(b?.name||'')}</td></tr>`}).join('')}
 function renderBranches(){document.getElementById('branchesBody').innerHTML=data.branches.map(x=>`<tr><td contenteditable="true" data-col="name">${esc(x.name)}</td><td contenteditable="true" data-col="city">${esc(x.city)}</td><td contenteditable="true" data-col="address">${esc(x.address||'')}</td><td contenteditable="true" data-col="phone">${esc(x.phone||'')}</td><td><button class="btn green" onclick="updateRow('branches','${x.id}',this)">Сақтау</button></td><td><button class="btn" onclick="deleteRow('branches','${x.id}')">Өшіру</button></td></tr>`).join('')}
@@ -232,7 +71,7 @@ function renderOwner(){document.getElementById('ownerKpis').innerHTML=[['Орт�
 function renderParent(){
 const st=parentStudent||data.students[0]||{};
 const paymentRows=data.payments.filter(x=>x.student_id===st.id);
-const latestPayment=paymentRows.length?paymentRows.sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0]:{};
+const latestPayment=paymentRows.length?paymentRows.sort((a,b)=>String(b.created_at||b.paid_at||'').localeCompare(String(a.created_at||a.paid_at||'')))[0]:{};
 const attendanceRows=data.attendance.filter(x=>x.student_id===st.id).sort((a,b)=>String(b.lesson_date||'').localeCompare(String(a.lesson_date||'')));
 const cameCount=attendanceRows.filter(x=>x.attendance_status==='Келді').length;
 const missedCount=attendanceRows.filter(x=>x.attendance_status!=='Келді').length;
@@ -254,85 +93,12 @@ document.getElementById('parentInfoBody').innerHTML=
 <tr><th>Код</th><td>${esc(st.student_code||'')}</td></tr>`;
 document.getElementById('parentNoticesBody').innerHTML=attendanceRows.map(x=>`<tr><td>${esc(x.lesson_date||'')}</td><td>${esc(x.attendance_status||'')}</td><td>${esc(x.topic||'')}</td></tr>`).join('');
 }
-function fillSelects(){const branchOpts='<option value="">Филиал</option>'+data.branches.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');['studentBranch','groupBranch','inviteBranch'].forEach(id=>document.getElementById(id).innerHTML=branchOpts);const studentOpts=data.students.map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');['noticeStudent','progStudent','attStudent','paymentStudent'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=studentOpts;});document.getElementById('attGroup').innerHTML=data.groups.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}
-function openWhatsApp(phone,text){
-  const cleaned = String(phone || '').replace(/[^\\d]/g,'');
-  if(!cleaned){
-    alert('Телефон нөмірі жоқ');
-    return;
-  }
-  const url = `https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')}`;
-  window.open(url,'_blank');
-
+function fillSelects(){const branchOpts='<option value="">Филиал</option>'+data.branches.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');['studentBranch','groupBranch','inviteBranch'].forEach(id=>document.getElementById(id).innerHTML=branchOpts);const studentOpts=data.students.map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');['noticeStudent','progStudent','attStudent'].forEach(id=>document.getElementById(id).innerHTML=studentOpts);document.getElementById('attGroup').innerHTML=data.groups.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}
 async function saveLead(){const r=await sb.from('leads').insert({full_name:val('leadName'),phone:val('leadPhone'),direction:val('leadDirection'),source:val('leadSource'),stage:val('leadStage'),manager_note:val('leadNote')});if(r.error)return alert(r.error.message);await loadAll();renderLeads()}
-async function saveStudent(){const monthly=Number(val('studentFee')||0); const firstDate=val('studentNextPayment')||new Date().toISOString().slice(0,10); const nextDate=addOneMonth(firstDate); const r=await sb.from('students').insert({tenant_id:tenantId(),branch_id:val('studentBranch')||branchIdDefault(),full_name:val('studentName'),parent_name:val('studentParent'),phone:val('studentPhone'),whatsapp_phone:val('studentPhone'),direction:val('studentDirection'),student_code:val('studentCode'),pin_code:val('studentPin'),birth_date:val('studentBirthDate')||null,monthly_fee:monthly,first_payment_date:firstDate,last_payment_date:firstDate,next_payment_date:nextDate,payment_status:'Төлемеді',debt_amount:monthly,discount_amount:0}).select().single();if(r.error)return alert(r.error.message);const p=await sb.from('payments').insert({tenant_id:r.data.tenant_id,branch_id:r.data.branch_id,student_id:r.data.id,paid_at:firstDate,due_date:nextDate,payment_status:'Төлемеді',paid_amount:0,debt_amount:monthly,discount_amount:0,billing_month:fmtMonth(firstDate),note:' жоспары'}); if(p.error) return alert(p.error.message); await loadAll();renderAll()}
+async function saveStudent(){const monthly=Number(val('studentFee')||0);const r=await sb.from('students').insert({full_name:val('studentName'),parent_name:val('studentParent'),phone:val('studentPhone'),whatsapp_phone:val('studentPhone'),direction:val('studentDirection'),student_code:val('studentCode'),pin_code:val('studentPin'),birth_date:val('studentBirthDate')||null,monthly_fee:monthly,next_payment_date:val('studentNextPayment')||null,branch_id:val('studentBranch')||null}).select().single();if(r.error)return alert(r.error.message);await sb.from('payments').insert({student_id:r.data.id,branch_id:r.data.branch_id,payment_status:'Төлемеді',paid_amount:0,debt_amount:monthly,discount_amount:0,billing_month:new Date().toISOString().slice(0,7)});await loadAll();renderAll()}
 async function saveGroup(){const r=await sb.from('groups').insert({name:val('groupName'),direction:val('groupDirection'),teacher_name:val('groupTeacherName'),schedule:val('groupSchedule'),room:val('groupRoom'),branch_id:val('groupBranch')||null});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
 async function saveAttendance(){const r=await sb.from('attendance_journal').insert({group_id:val('attGroup')||null,student_id:val('attStudent')||null,lesson_date:val('attDate'),topic:val('attTopic'),attendance_status:val('attStatus'),homework:val('attHomework'),teacher_comment:val('attComment'),created_by:session?.user?.id||null});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveCash(){const r=await sb.from('cashbox_entries').insert({tenant_id:tenantId(),branch_id:branchIdDefault(),entry_type:val('cashType'),amount:Number(val('cashAmount')||0),entry_date:val('cashDate')||null,person_name:val('cashPerson'),category:val('cashCategory'),note:val('cashNote')});if(r.error)return alert(r.error.message);await loadAll();renderCashbox();alert('Сақталды')}
-async function savePayment(){
-  const studentId=val('paymentStudent');
-  const st=data.students.find(x=>x.id===studentId);
-  if(!st) return alert('Оқушыны таңда');
-  const paidAt=val('paymentPaidAt')||new Date().toISOString().slice(0,10);
-  const dueDate=val('paymentDueDate')||addOneMonth(paidAt);
-  const paidAmount=Number(val('paymentAmount')||0);
-  const discountAmount=Number(val('paymentDiscount')||0);
-  const paymentStatus=computeStatus(st.monthly_fee, paidAmount, discountAmount);
-  const debtAmount=computeDebt(st.monthly_fee, paidAmount, discountAmount);
-  const r=await sb.from('payments').insert({
-    tenant_id: st.tenant_id||tenantId(),
-    branch_id: st.branch_id||branchIdDefault(),
-    student_id: st.id,
-    paid_at: paidAt,
-    due_date: dueDate,
-    paid_amount: paidAmount,
-    discount_amount: discountAmount,
-    debt_amount: debtAmount,
-    payment_status: paymentStatus,
-    billing_month: val('paymentMonth')||fmtMonth(paidAt),
-    note: val('paymentNote'),
-    created_by: session?.user?.id||null
-  });
-  if(r.error) return alert(r.error.message);
-  await sb.from('students').update({
-    first_payment_date: st.first_payment_date || paidAt,
-    last_payment_date: paidAmount>0 ? paidAt : st.last_payment_date,
-    next_payment_date: paymentStatus==='Төледі' ? addOneMonth(dueDate) : dueDate,
-    payment_status: paymentStatus,
-    debt_amount: debtAmount,
-    discount_amount: discountAmount
-  }).eq('id', st.id);
-  await loadAll(); renderAll();
-  alert('Төлем сақталды');
-}
-async function saveSalary(){
-  const r=await sb.from('salary_entries').insert({
-    tenant_id: tenantId(),
-    branch_id: branchIdDefault(),
-    person_name: val('salaryPerson'),
-    position_name: val('salaryPosition'),
-    salary_month: val('salaryMonth'),
-    amount: Number(val('salaryAmount')||0),
-    paid_date: val('salaryDate')||new Date().toISOString().slice(0,10),
-    note: val('salaryNote')
-  });
-  if(r.error) return alert(r.error.message);
-  await loadAll(); renderCashbox(); alert('Жалақы сақталды');
-}
-async function saveExpense(){
-  const r=await sb.from('expense_entries').insert({
-    tenant_id: tenantId(),
-    branch_id: branchIdDefault(),
-    expense_name: val('expenseName'),
-    category: val('expenseCategory'),
-    person_name: val('expensePerson'),
-    amount: Number(val('expenseAmount')||0),
-    expense_date: val('expenseDate')||new Date().toISOString().slice(0,10),
-    note: val('expenseNote')
-  });
-  if(r.error) return alert(r.error.message);
-  await loadAll(); renderCashbox(); alert('Шығыс сақталды');
-}
+async function saveCash(){const r=await sb.from('cashbox_entries').insert({entry_type:val('cashType'),amount:Number(val('cashAmount')||0),entry_date:val('cashDate')||null,note:val('cashNote')});if(r.error)return alert(r.error.message);alert('Сақталды')}
 async function saveProgress(){const r=await sb.from('education_records').insert({student_id:val('progStudent'),homework:val('progHomework'),test_score:Number(val('progScore')||0),progress_status:val('progStatus'),teacher_comment:val('progComment')});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
 async function saveInvite() {
   try {
@@ -413,54 +179,26 @@ async function saveInvite() {
   }
 }
 async function saveBranch(){const r=await sb.from('branches').insert({name:val('branchName'),city:val('branchCity'),address:val('branchAddress'),phone:val('branchPhone')});if(r.error)return alert(r.error.message);await loadAll();renderAll()}
-async function saveNotice(){sendNotice()}
-function sendNotice(){const st=data.students.find(x=>x.id===val('noticeStudent'));if(!st)return alert('Оқушы таңдалмады'); const type=val('noticeType'); const text=val('noticeBody')||messageForStudent(st.id,type); openWhatsApp(st.phone||st.whatsapp_phone,text)}
-function sendCrm(){openWhatsApp(val('crmMsgPhone'),`Сәлеметсіз бе, ${val('crmMsgName')}! ${val('crmMsgBody')}`)}
+async function saveNotice(){const r=await sb.from('notifications').insert({student_id:val('noticeStudent'),title:val('noticeType'),body:val('noticeBody'),channel:'WhatsApp',created_by:session?.user?.id||null});if(r.error)return alert(r.error.message);await loadAll();renderAll();alert('Хабарлама сақталды')}
 function renderCalendar(){const mSel=document.getElementById('monthSelect'),ySel=document.getElementById('yearSelect');if(!mSel.options.length){['Қаңтар','Ақпан','Наурыз','Сәуір','Мамыр','Маусым','Шілде','Тамыз','Қыркүйек','Қазан','Қараша','Желтоқсан'].forEach((m,i)=>mSel.add(new Option(m,i)));for(let y=2024;y<=2030;y++)ySel.add(new Option(String(y),y));const now=new Date();mSel.value=now.getMonth();ySel.value=now.getFullYear();mSel.onchange=renderCalendar;ySel.onchange=renderCalendar;}const month=Number(mSel.value),year=Number(ySel.value),first=new Date(year,month,1),lastDate=new Date(year,month+1,0).getDate(),start=(first.getDay()+6)%7,grid=document.getElementById('calendarGrid');grid.innerHTML='';['Дс','Сс','Ср','Бс','Жм','Сб','Жс'].forEach(d=>{const n=document.createElement('div');n.className='day-name';n.textContent=d;grid.appendChild(n)});for(let i=0;i<start;i++){const c=document.createElement('div');c.className='day-cell';c.style.opacity='.35';grid.appendChild(c)}for(let day=1;day<=lastDate;day++){const date=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,count=data.attendance.filter(x=>x.lesson_date===date).length,c=document.createElement('div');c.className='day-cell';c.innerHTML=`<strong>${day}</strong><div style="font-size:11px;color:#6b7280;margin-top:6px">${count} жазба</div>`;c.onclick=()=>{document.querySelectorAll('.day-cell').forEach(x=>x.classList.remove('active'));c.classList.add('active');document.getElementById('selectedDateLabel').textContent=date;const rows=data.attendance.filter(x=>x.lesson_date===date);document.getElementById('dayAttendanceBody').innerHTML=rows.length?rows.map(x=>{const st=data.students.find(s=>s.id===x.student_id),gr=data.groups.find(g=>g.id===x.group_id);return `<tr><td>${esc(st?.full_name||'')}</td><td>${esc(gr?.name||'')}</td><td>${esc(x.attendance_status)}</td></tr>`}).join(''):'<tr><td colspan="3">Бұл күнге жазба жоқ</td></tr>'};grid.appendChild(c)}}
 
-function rowData(tr){const out={};tr.querySelectorAll('[data-col]').forEach(td=>out[td.dataset.col]=td.innerText.trim());return out}
-async function updateRow(table,id,btn){
-  const tr=btn.closest('tr');
-  const payload=rowData(tr);
-  if(payload.monthly_fee!==undefined) payload.monthly_fee=Number(String(payload.monthly_fee).replace(/[^0-9.\-]/g,''))||0;
-  if(payload.test_score!==undefined) payload.test_score=Number(payload.test_score)||0;
-  if(payload.age_years!==undefined) payload.age_years=Number(payload.age_years)||null;
-  const r=await sb.from(table).update(payload).eq('id',id);
-  if(r.error) return alert(r.error.message);
-  await loadAll(); renderAll(); alert('Сақталды');
-}
-async function deleteRow(table,id){
-  if(!confirm('Өшіремін бе?')) return;
-  const r=await sb.from(table).delete().eq('id',id);
-  if(r.error) return alert(r.error.message);
-  await loadAll(); renderAll();
-}
-async function logout(){await sb.auth.signOut();location.reload()}
-function bindClick(id, fn){const el=document.getElementById(id); if(el) el.onclick=fn;}
-bindClick('signUpDirectorBtn',signUpDirector);
-bindClick('loginBtn',login);
-bindClick('parentLoginBtn',parentLogin);
-bindClick('logoutBtn',logout);
-bindClick('logoutBtnTop',logout);
-bindClick('saveLeadBtn',saveLead);
-bindClick('saveStudentBtn',saveStudent);
-bindClick('saveGroupBtn',saveGroup);
-bindClick('saveAttendanceBtn',saveAttendance);
-bindClick('saveCashBtn',saveCash);
-bindClick('savePaymentBtn',savePayment);
-bindClick('openStudentPaymentBtn',()=>setSection('payments'));
-bindClick('saveSalaryBtn',saveSalary);
-bindClick('saveExpenseBtn',saveExpense);
-bindClick('saveProgBtn',saveProgress);
-bindClick('saveInviteBtn',saveInvite);
-bindClick('saveBranchBtn',saveBranch);
-bindClick('sendBtn',sendNotice);
-bindClick('crmMsgSend',sendCrm);
-const birthEl=document.getElementById('studentBirthDate');
-if(birthEl) birthEl.onchange=()=>{const a=ageFromDate(val('studentBirthDate')); const target=document.getElementById('studentAge'); if(target) target.value=a? a+' жас' : ''};
-['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch','paymentSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',()=>renderAll());});
-(async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
 
+function openWhatsApp(phone,text){
+  const cleaned = String(phone || '').replace(/[^\d]/g,'');
+  if (!cleaned) {
+    alert('Телефон нөмірі жоқ');
+    return;
+  }
+  window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text || '')}`,'_blank');
+}
+function sendNotice(){
+  const st = data.students.find(x => x.id === val('noticeStudent'));
+  if(!st) return alert('Оқушы таңдалмады');
+  openWhatsApp(st.phone || st.whatsapp_phone, val('noticeBody'));
+}
+function sendCrm(){
+  openWhatsApp(val('crmMsgPhone'), `Сәлеметсіз бе, ${val('crmMsgName')}! ${val('crmMsgBody')}`);
+}
 function downloadFile(name, content, type){
   const blob=new Blob([content],{type});
   const a=document.createElement('a');
@@ -472,7 +210,7 @@ function downloadFile(name, content, type){
 function getFinanceRows(){
   const payments=(data.payments||[]).map(x=>({
     section:'Төлем',
-    student:x.student_name||x.full_name||x.student_id||'',
+    student:(data.students||[]).find(s=>s.id===x.student_id)?.full_name || '',
     amount:x.paid_amount||x.amount||0,
     status:x.payment_status||'',
     date:x.paid_at||x.created_at||'',
@@ -504,64 +242,52 @@ function exportPaymentsExcel(){
 function exportPaymentsPDF(){
   const rows=getFinanceRows();
   let text='Төлем / Кіріс / Шығыс\n\n';
-  rows.forEach((r,i)=>{
-    text += `${i+1}. ${r.section} | ${r.student} | ${r.amount} | ${r.status} | ${r.date} | ${r.note}\n`;
-  });
+  rows.forEach((r,i)=>{ text += `${i+1}. ${r.section} | ${r.student} | ${r.amount} | ${r.status} | ${r.date} | ${r.note}\n`; });
   downloadFile('tolem-kyrys-shygys.pdf', text, 'application/pdf');
 }
-// v9 WhatsApp binding fix
+function bindClick(id, fn){
+  const el=document.getElementById(id);
+  if(el) el.onclick=fn;
 }
-  window.addEventListener('DOMContentLoaded', async () => {
-  const signUpBtn = document.getElementById('signUpDirectorBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const parentLoginBtn = document.getElementById('parentLoginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const logoutBtnTop = document.getElementById('logoutBtnTop');
 
-  if (signUpBtn && typeof signUpDirector === 'function') {
-    signUpBtn.onclick = signUpDirector;
-  }
-
-  if (loginBtn && typeof login === 'function') {
-    loginBtn.onclick = login;
-  }
-
-  if (parentLoginBtn && typeof parentLogin === 'function') {
-    parentLoginBtn.onclick = parentLogin;
-  }
-
-  if (logoutBtn && typeof logout === 'function') {
-    logoutBtn.onclick = logout;
-  }
-
-  if (logoutBtnTop && typeof logout === 'function') {
-    logoutBtnTop.onclick = logout;
-  }
-
-  const crmBtn = document.getElementById('crmMsgSend');
-  if (crmBtn && typeof sendCrm === 'function') {
-    crmBtn.onclick = sendCrm;
-  }
-
-  const waBtn = document.getElementById('sendWhatsAppBtn');
-  if (waBtn && typeof sendNotice === 'function') {
-    waBtn.onclick = sendNotice;
-  }
-
-  if (typeof sb !== 'undefined' && sb.auth) {
-    const s = await sb.auth.getSession();
-    session = s?.data?.session || null;
-    if (session && typeof bootstrap === 'function') {
-      await bootstrap();
-    }
-  }
-});
-  function renderCalendar() {
-  // уақытша бос функция
+function rowData(tr){const out={};tr.querySelectorAll('[data-col]').forEach(td=>out[td.dataset.col]=td.innerText.trim());return out}
+async function updateRow(table,id,btn){
+  const tr=btn.closest('tr');
+  const payload=rowData(tr);
+  if(payload.monthly_fee!==undefined) payload.monthly_fee=Number(String(payload.monthly_fee).replace(/[^0-9.\-]/g,''))||0;
+  if(payload.test_score!==undefined) payload.test_score=Number(payload.test_score)||0;
+  
+  const r=await sb.from(table).update(payload).eq('id',id);
+  if(r.error) return alert(r.error.message);
+  await loadAll(); renderAll(); alert('Сақталды');
 }
-  function renderCalendar() {
-  return;
+async function deleteRow(table,id){
+  if(!confirm('Өшіремін бе?')) return;
+  const r=await sb.from(table).delete().eq('id',id);
+  if(r.error) return alert(r.error.message);
+  await loadAll(); renderAll();
 }
+async function logout(){await sb.auth.signOut();location.reload()}
+
+bindClick('signUpDirectorBtn',signUpDirector);
+bindClick('loginBtn',login);
+bindClick('parentLoginBtn',parentLogin);
+bindClick('logoutBtn',logout);
+bindClick('logoutBtnTop',logout);
+bindClick('saveLeadBtn',saveLead);
+bindClick('saveStudentBtn',saveStudent);
+bindClick('saveGroupBtn',saveGroup);
+bindClick('saveAttendanceBtn',saveAttendance);
+bindClick('saveCashBtn',saveCash);
+bindClick('saveProgBtn',saveProgress);
+bindClick('saveInviteBtn',saveInvite);
+bindClick('saveBranchBtn',saveBranch);
+bindClick('sendWhatsAppBtn',sendNotice);
+bindClick('crmMsgSend',sendCrm);
+const birthEl=document.getElementById('studentBirthDate');
+if(birthEl) birthEl.onchange=()=>{const t=document.getElementById('studentAge'); if(t) t.value=ageFromDate(val('studentBirthDate'))?ageFromDate(val('studentBirthDate'))+' жас':''};
+['leadSearch','studentSearch','groupSearch','attendanceSearch','progSearch','paymentSearch'].forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener('input',()=>renderAll());});
+(async()=>{const s=await sb.auth.getSession();session=s.data.session;if(session)await bootstrap()})();
 </script>
 </body>
 </html>
