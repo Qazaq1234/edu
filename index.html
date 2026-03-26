@@ -1,58 +1,13 @@
-<!doctype html>
-<html lang="kk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Edukz Басқарушы</title>
-<style>
-:root{--bg:#f6f8fc;--card:#fff;--line:#e2e8f0;--blue:#2563eb;--text:#0f172a;--muted:#64748b;--green:#16a34a;--orange:#ea580c}
-*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)} .wrap{max-width:1200px;margin:0 auto;padding:24px}.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05)} .grid{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.btn{background:var(--blue);color:#fff;border:0;border-radius:14px;padding:12px 14px;font-weight:800;cursor:pointer}.btn.green{background:var(--green)}.btn.orange{background:var(--orange)} input,select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:12px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:14px;vertical-align:top}.muted{color:var(--muted)} .badge{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#eef2ff;color:#1d4ed8} @media(max-width:960px){.grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="head"><h1 style="margin:0">Edukz Басқарушы</h1><div class="muted">Founder / тариф / доступ</div></div>
-  <div class="grid">
-    <div class="card">
-      <h2>Орталық тіркеу</h2>
-      <input id="c_name" placeholder="Орталық атауы">
-      <input id="c_owner" placeholder="Басқарушы аты">
-      <input id="c_phone" placeholder="Телефон">
-      <input id="c_email" placeholder="Email">
-      <select id="c_tariff">
-        <option value="starter">1 тариф — Оқушылар, журнал, қызметкер</option>
-        <option value="standard">2 тариф — Барлығы, online блоктарсыз</option>
-        <option value="pro">3 тариф — Толық ашық бәрі</option>
-        <option value="online_only">4 тариф — Тек online курстарға</option>
-      </select>
-      <input id="c_paylabel" placeholder="Kaspi / Halyk / Freedom">
-      <input id="c_paylink" placeholder="Банк/Kaspi төлем ссылкасы">
-      <button class="btn" onclick="addCenter()">Тіркеу</button>
-    </div>
-    <div class="card">
-      <h2>Тариф логикасы</h2>
-      <table class="table">
-        <tr><th>Тариф</th><th>Ашық бөлімдер</th></tr>
-        <tr><td>1</td><td>Оқушылар, Журнал, Қызметкерлер</td></tr>
-        <tr><td>2</td><td>Барлығы, тек онлайн курс / онлайн сабақ / онлайн оқушылар жоқ</td></tr>
-        <tr><td>3</td><td>Барлығы толық ашық, online portal ссылкасы беріледі</td></tr>
-        <tr><td>4</td><td>Тек онлайн курс, онлайн сабақ, онлайн оқушылар</td></tr>
-      </table>
-    </div>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <h2>Орталықтар және доступ ашу</h2>
-    <table class="table" id="centersTable"></table>
-  </div>
-</div>
+<!doctype html><html lang="kk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Edukz Owner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="edukz_config.example.js"></script>
+<style>body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f7fb;color:#112}.wrap{max-width:1200px;margin:0 auto;padding:18px}.card{background:#fff;border:1px solid #dde6f0;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 6px 24px rgba(15,23,42,.05)}input,button,select{font:inherit}input,select{width:100%;padding:11px 12px;border:1px solid #dbe4ef;border-radius:12px}.btn{background:#245cff;color:#fff;border:0;padding:11px 14px;border-radius:12px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #e6edf5;text-align:left} .row{display:flex;gap:10px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style></head><body><div class="wrap"><div class="card"><h1>Орталықтар бақылау</h1><div class="row"><input id="owner-secret" placeholder="Owner secret"><button class="btn" id="load-btn">Жүктеу</button><input id="search" placeholder="Іздеу"></div></div><div id="content"></div></div>
 <script>
-const LS={founder:'edukz_founder_state_v5'};
-function seed(){if(!localStorage.getItem(LS.founder)){localStorage.setItem(LS.founder,JSON.stringify({centers:[{id:'c1',name:'Demo EduKZ',owner:'Altaiyr',phone:'+7 777 000 00 00',email:'demo@edukz.kz',tariff:'pro',status:'approved',paymentLink:'https://pay.kaspi.kz/pay/demo123',paymentLabel:'Kaspi төлем'}]}))}}; seed();
-function getState(){return JSON.parse(localStorage.getItem(LS.founder)||'{"centers":[]}')} function saveState(s){localStorage.setItem(LS.founder,JSON.stringify(s))}
-const tariffModules={starter:['students','journal','staff'],standard:['students','journal','staff','requests','settings'],pro:['students','journal','staff','requests','courses','online_students','settings'],online_only:['courses','online_students','requests','settings']};
-function addCenter(){const s=getState(); const center={id:'c'+Date.now(),name:document.getElementById('c_name').value.trim(),owner:document.getElementById('c_owner').value.trim(),phone:document.getElementById('c_phone').value.trim(),email:document.getElementById('c_email').value.trim(),tariff:document.getElementById('c_tariff').value,status:'pending',paymentLabel:document.getElementById('c_paylabel').value.trim(),paymentLink:document.getElementById('c_paylink').value.trim(),modules:tariffModules[document.getElementById('c_tariff').value]}; if(!center.name) return alert('Атауды толтыр'); s.centers.push(center); saveState(s); render(); alert('Өтінім founder-ға түсті')}
-function approve(id){const s=getState(); const c=s.centers.find(x=>x.id===id); c.status='approved'; c.modules=tariffModules[c.tariff]; saveState(s); render(); alert('Доступ ашылды')}
-function render(){const s=getState(); document.getElementById('centersTable').innerHTML=`<tr><th>Орталық</th><th>Тариф</th><th>Төлем ссылкасы</th><th>Статус</th><th>Әрекет</th></tr>${s.centers.map(c=>`<tr><td><strong>${c.name}</strong><div class="muted">${c.owner||''}</div></td><td>${c.tariff}</td><td style="word-break:break-all">${c.paymentLabel||''}<br>${c.paymentLink||''}</td><td><span class="badge">${c.status}</span></td><td><button class="btn green" onclick="approve('${c.id}')">Доступ ашу</button></td></tr>`).join('')}`}
-window.addEventListener('storage',render); render();
-</script>
-</body></html>
+const {createClient}=supabase; const cfg=window.EDUKZ_CONFIG||{}; const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey); let loaded=false; const qs=i=>document.getElementById(i);
+function money(v){return new Intl.NumberFormat('kk-KZ').format(Number(v||0))+' ₸';}
+async function load(){ if(qs('owner-secret').value!==cfg.ownerSecret){ alert('Owner secret қате'); return;} loaded=true; render(); }
+async function render(){ if(!loaded)return; const q=qs('search').value?.trim().toLowerCase()||''; const [{data:centers},{data:reqs},{data:tariffs}] = await Promise.all([sb.from('centers').select('*').order('created_at',{ascending:false}),sb.from('owner_requests').select('*').order('created_at',{ascending:false}),sb.from('tariffs').select('*')]); const tariffMap=Object.fromEntries((tariffs||[]).map(t=>[t.code,t])); const list=(centers||[]).filter(c=>!q || c.center_name.toLowerCase().includes(q) || (c.city||'').toLowerCase().includes(q)); qs('content').innerHTML=`<div class="card"><table><tr><th>Орталық</th><th>Қала</th><th>Тариф</th><th>Статус</th><th>Сұраныстар</th><th>Әрекет</th></tr>${list.map(c=>{const r=(reqs||[]).filter(x=>x.center_id===c.id)[0]; return `<tr><td>${c.center_name}</td><td>${c.city||''}</td><td><select onchange="changeTariff('${c.id}',this.value)">${Object.keys(tariffMap).map(code=>`<option ${c.tariff_code===code?'selected':''} value="${code}">${tariffMap[code].title}</option>`).join('')}</select></td><td>${c.tariff_status}</td><td>${r?`${r.requested_tariff} / ${r.request_status}`:'-'}</td><td><button onclick="setStatus('${c.id}','active')">Доступ ашу</button> <button onclick="setStatus('${c.id}','blocked')">Жабу</button></td></tr>`}).join('')}</table></div>`; }
+async function setStatus(id,status){ const res=await sb.from('centers').update({tariff_status:status}).eq('id',id); if(res.error) alert(res.error.message); else render(); }
+async function changeTariff(id,code){ const res=await sb.from('centers').update({tariff_code:code}).eq('id',id); if(res.error) alert(res.error.message); else render(); }
+window.setStatus=setStatus; window.changeTariff=changeTariff; qs('load-btn').onclick=load; qs('search').oninput=()=>render();
+</script></body></html>
+
