@@ -1,13 +1,65 @@
-<!doctype html><html lang="kk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Edukz Owner</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="edukz_config.example.js"></script>
-<style>body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f7fb;color:#112}.wrap{max-width:1200px;margin:0 auto;padding:18px}.card{background:#fff;border:1px solid #dde6f0;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 6px 24px rgba(15,23,42,.05)}input,button,select{font:inherit}input,select{width:100%;padding:11px 12px;border:1px solid #dbe4ef;border-radius:12px}.btn{background:#245cff;color:#fff;border:0;padding:11px 14px;border-radius:12px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #e6edf5;text-align:left} .row{display:flex;gap:10px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style></head><body><div class="wrap"><div class="card"><h1>Орталықтар бақылау</h1><div class="row"><input id="owner-secret" placeholder="Owner secret"><button class="btn" id="load-btn">Жүктеу</button><input id="search" placeholder="Іздеу"></div></div><div id="content"></div></div>
-<script>
-const {createClient}=supabase; const cfg=window.EDUKZ_CONFIG||{}; const sb=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey); let loaded=false; const qs=i=>document.getElementById(i);
-function money(v){return new Intl.NumberFormat('kk-KZ').format(Number(v||0))+' ₸';}
-async function load(){ if(qs('owner-secret').value!==cfg.ownerSecret){ alert('Owner secret қате'); return;} loaded=true; render(); }
-async function render(){ if(!loaded)return; const q=qs('search').value?.trim().toLowerCase()||''; const [{data:centers},{data:reqs},{data:tariffs}] = await Promise.all([sb.from('centers').select('*').order('created_at',{ascending:false}),sb.from('owner_requests').select('*').order('created_at',{ascending:false}),sb.from('tariffs').select('*')]); const tariffMap=Object.fromEntries((tariffs||[]).map(t=>[t.code,t])); const list=(centers||[]).filter(c=>!q || c.center_name.toLowerCase().includes(q) || (c.city||'').toLowerCase().includes(q)); qs('content').innerHTML=`<div class="card"><table><tr><th>Орталық</th><th>Қала</th><th>Тариф</th><th>Статус</th><th>Сұраныстар</th><th>Әрекет</th></tr>${list.map(c=>{const r=(reqs||[]).filter(x=>x.center_id===c.id)[0]; return `<tr><td>${c.center_name}</td><td>${c.city||''}</td><td><select onchange="changeTariff('${c.id}',this.value)">${Object.keys(tariffMap).map(code=>`<option ${c.tariff_code===code?'selected':''} value="${code}">${tariffMap[code].title}</option>`).join('')}</select></td><td>${c.tariff_status}</td><td>${r?`${r.requested_tariff} / ${r.request_status}`:'-'}</td><td><button onclick="setStatus('${c.id}','active')">Доступ ашу</button> <button onclick="setStatus('${c.id}','blocked')">Жабу</button></td></tr>`}).join('')}</table></div>`; }
-async function setStatus(id,status){ const res=await sb.from('centers').update({tariff_status:status}).eq('id',id); if(res.error) alert(res.error.message); else render(); }
-async function changeTariff(id,code){ const res=await sb.from('centers').update({tariff_code:code}).eq('id',id); if(res.error) alert(res.error.message); else render(); }
-window.setStatus=setStatus; window.changeTariff=changeTariff; qs('load-btn').onclick=load; qs('search').oninput=()=>render();
-</script></body></html>
+<!doctype html>
+<html lang="kk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EdukZ Owner Portal</title>
+  <style>
+    :root{
+      --bg:#eef2ff; --card:#fff; --line:#e6ebf2; --text:#111827; --muted:#6b7280;
+      --brand:#2563eb; --brand2:#4f46e5; --ok:#16a34a; --danger:#dc2626; --shadow:0 14px 40px rgba(17,24,39,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}
+    .wrap{max-width:1220px;margin:26px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+    .hero{background:linear-gradient(135deg,#0f172a,#312e81);color:#fff}
+    .hero h1{font-size:48px;margin:0 0 10px}
+    .hero p{margin:0;color:#ddd6fe;font-size:18px}
+    .grid{display:grid;gap:16px}
+    .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .input,.select,.btn{padding:12px 14px;border-radius:14px;font:inherit}
+    .input,.select{width:100%;border:1px solid #d1d5db;background:#fff}
+    .btn{border:none;cursor:pointer;font-weight:800}
+    .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+    .btn.ok{background:var(--ok);color:#fff}
+    .btn.danger{background:var(--danger);color:#fff}
+    table{width:100%;border-collapse:collapse;min-width:760px}
+    th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
+    th{font-size:12px;text-transform:uppercase;color:var(--muted);background:#fafcff}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card hero">
+      <h1>EdukZ Owner</h1>
+      <p>Орталықтарды бақылау, тариф беру, доступ ашу және жабу үшін platform owner панелі.</p>
+    </div>
 
+    <div class="card">
+      <div class="grid g3">
+        <div><input class="input" placeholder="Іздеу" /></div>
+        <div><select class="select"><option>Тариф фильтрі</option><option>Эконом</option><option>Стандарт</option><option>Про</option><option>Онлайн</option></select></div>
+        <div><select class="select"><option>Статус фильтрі</option><option>Ашық</option><option>Жабық</option><option>Demo</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:24px;font-weight:900;margin-bottom:12px">Орталықтар бақылау</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Орталық</th><th>Қала</th><th>Тариф</th><th>Статус</th><th>Demo</th><th>Әрекет</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Demo EdukZ</td><td>Өскемен</td><td><span class="pill">Про</span></td><td>Ашық</td><td>Жоқ</td><td><button class="btn ok">Доступ ашу</button> <button class="btn danger">Жабу</button></td></tr>
+            <tr><td>Bilim Hub</td><td>Алматы</td><td><span class="pill">Стандарт</span></td><td>Жабық</td><td>Иә</td><td><button class="btn ok">Доступ ашу</button> <button class="btn danger">Жабу</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
