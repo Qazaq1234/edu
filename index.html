@@ -3,46 +3,137 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>EdukZ Owner Portal</title>
+  <title>EdukZ Owner Live</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
-      --bg:#eef2ff; --card:#fff; --line:#e6ebf2; --text:#111827; --muted:#6b7280;
-      --brand:#2563eb; --brand2:#4f46e5; --ok:#16a34a; --danger:#dc2626; --shadow:0 14px 40px rgba(17,24,39,.08);
+      --bg:#f4f7fb; --card:#fff; --line:#e7ebf3; --text:#111827; --muted:#6b7280;
+      --brand:#2563eb; --brand2:#4f46e5; --ok:#16a34a; --warn:#d97706; --danger:#dc2626;
+      --shadow:0 14px 40px rgba(17,24,39,.08); --radius:22px;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}
-    .wrap{max-width:1220px;margin:26px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
-    .hero{background:linear-gradient(135deg,#0f172a,#312e81);color:#fff}
-    .hero h1{font-size:48px;margin:0 0 10px}
-    .hero p{margin:0;color:#ddd6fe;font-size:18px}
+    .hidden{display:none!important}
+    .wrap{max-width:1280px;margin:26px auto;padding:0 16px}
+    .card,.hero{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .hero{background:linear-gradient(135deg,#0f172a,#312e81);color:#fff;padding:30px;margin-bottom:16px}
+    .hero h1{font-size:46px;line-height:1.04;margin:0 0 10px}
+    .hero p{margin:0;color:#ddd6fe;font-size:18px;line-height:1.5}
+    .card{padding:20px;margin-bottom:16px}
     .grid{display:grid;gap:16px}
+    .g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
     .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-    .input,.select,.btn{padding:12px 14px;border-radius:14px;font:inherit}
-    .input,.select{width:100%;border:1px solid #d1d5db;background:#fff}
-    .btn{border:none;cursor:pointer;font-weight:800}
+    .g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+    .input,.select,.textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit}
+    .textarea{min-height:96px}
+    .btn{appearance:none;border:none;border-radius:14px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer}
     .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+    .btn.secondary{background:#fff;border:1px solid var(--line)}
     .btn.ok{background:var(--ok);color:#fff}
+    .btn.warn{background:var(--warn);color:#fff}
     .btn.danger{background:var(--danger);color:#fff}
-    table{width:100%;border-collapse:collapse;min-width:760px}
-    th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
-    th{font-size:12px;text-transform:uppercase;color:var(--muted);background:#fafcff}
-    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:700}
+    .notice{padding:12px 14px;border-radius:16px;background:#eff6ff;color:#1d4ed8;margin-bottom:12px}
+    .notice.err{background:#fee2e2;color:#991b1b}
+    .notice.ok{background:#dcfce7;color:#166534}
+    .muted{color:var(--muted)}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}
+    table{width:100%;border-collapse:collapse;min-width:980px}
+    th,td{padding:11px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top}
+    th{font-size:12px;color:var(--muted);text-transform:uppercase;background:#fafcff}
+    .kpi .label{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:800}
+    .kpi .value{font-size:30px;font-weight:900;margin-top:8px}
+    .status-open{color:#16a34a;font-weight:800}
+    .status-closed{color:#dc2626;font-weight:800}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .small{font-size:12px}
+    @media (max-width:980px){ .wrap{padding:0 12px} }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card hero">
-      <h1>EdukZ Owner</h1>
-      <p>Орталықтарды бақылау, тариф беру, доступ ашу және жабу үшін platform owner панелі.</p>
+    <div class="hero">
+      <h1>EdukZ Owner Portal</h1>
+      <p>Орталықтарды бақылау, тариф беру, доступ ашу/жабу және demo/read-only режимін басқару панелі.</p>
+    </div>
+
+    <div id="topNotice" class="notice hidden"></div>
+
+    <div class="grid g4">
+      <div class="card kpi"><div class="label">Орталық</div><div class="value" id="kpiCenters">0</div></div>
+      <div class="card kpi"><div class="label">Ашық</div><div class="value" id="kpiOpen">0</div></div>
+      <div class="card kpi"><div class="label">Demo</div><div class="value" id="kpiDemo">0</div></div>
+      <div class="card kpi"><div class="label">Про / Online</div><div class="value" id="kpiPro">0</div></div>
     </div>
 
     <div class="card">
       <div class="grid g3">
-        <div><input class="input" placeholder="Іздеу" /></div>
-        <div><select class="select"><option>Тариф фильтрі</option><option>Эконом</option><option>Стандарт</option><option>Про</option><option>Онлайн</option></select></div>
-        <div><select class="select"><option>Статус фильтрі</option><option>Ашық</option><option>Жабық</option><option>Demo</option></select></div>
+        <input id="searchInput" class="input" placeholder="Іздеу: орталық, қала, тариф" oninput="renderTenants()" />
+        <select id="filterTariff" class="select" onchange="renderTenants()">
+          <option value="">Барлық тариф</option>
+          <option value="demo">Demo</option>
+          <option value="econom">Эконом</option>
+          <option value="standard">Стандарт</option>
+          <option value="pro">Про</option>
+          <option value="online">Онлайн</option>
+        </select>
+        <select id="filterStatus" class="select" onchange="renderTenants()">
+          <option value="">Барлық статус</option>
+          <option value="active">Ашық</option>
+          <option value="pending">Pending</option>
+          <option value="blocked">Жабық</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div style="font-size:22px;font-weight:900;margin-bottom:12px">Орталық редакторы</div>
+        <div class="form-grid">
+          <select id="editTenantId" class="select" onchange="loadTenantIntoForm()"></select>
+          <input id="editName" class="input" placeholder="Орталық атауы" />
+          <input id="editCity" class="input" placeholder="Қала" />
+          <input id="editDirection" class="input" placeholder="Бағыты" />
+          <input id="editMainBranch" class="input" placeholder="Бас филиал" />
+          <input id="editBankLink" class="input" placeholder="Банк төлеміне ссылка" />
+          <select id="editTariff" class="select">
+            <option value="demo">Demo</option>
+            <option value="econom">Эконом</option>
+            <option value="standard">Стандарт</option>
+            <option value="pro">Про</option>
+            <option value="online">Онлайн</option>
+          </select>
+          <select id="editStatus" class="select">
+            <option value="active">Ашық</option>
+            <option value="pending">Pending</option>
+            <option value="blocked">Жабық</option>
+          </select>
+          <select id="editDemo" class="select">
+            <option value="true">Demo қосулы</option>
+            <option value="false">Demo өшірулі</option>
+          </select>
+          <select id="editOnline" class="select">
+            <option value="true">Online қосулы</option>
+            <option value="false">Online өшірулі</option>
+          </select>
+        </div>
+        <div class="row-actions" style="margin-top:12px">
+          <button class="btn primary" onclick="saveTenantEdits()">Сақтау</button>
+          <button class="btn danger" onclick="deleteTenant()">Өшіру</button>
+        </div>
+        <div class="notice small" style="margin-top:12px">Owner portal орталықтарды ашады, жабады, тариф береді және demo/read-only режимін басқарады.</div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:22px;font-weight:900;margin-bottom:12px">Жылдам басқару</div>
+        <div class="grid g2">
+          <button class="btn ok" onclick="bulkSetStatus('active')">Барлығын ашу емес, таңдалғанды ашу</button>
+          <button class="btn danger" onclick="bulkSetStatus('blocked')">Таңдалғанды жабу</button>
+          <button class="btn warn" onclick="bulkSetDemo(true)">Demo қосу</button>
+          <button class="btn secondary" onclick="bulkSetDemo(false)">Demo өшіру</button>
+        </div>
+        <div class="notice" style="margin-top:16px">Төмендегі кестеден орталықты таңда да, осы блокпен тез өзгерте бер.</div>
       </div>
     </div>
 
@@ -51,15 +142,260 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Орталық</th><th>Қала</th><th>Тариф</th><th>Статус</th><th>Demo</th><th>Әрекет</th></tr>
+            <tr>
+              <th>Орталық</th>
+              <th>Қала</th>
+              <th>Бағыт</th>
+              <th>Тариф</th>
+              <th>Статус</th>
+              <th>Demo</th>
+              <th>Online</th>
+              <th>Банк ссылка</th>
+              <th>Әрекет</th>
+            </tr>
           </thead>
-          <tbody>
-            <tr><td>Demo EdukZ</td><td>Өскемен</td><td><span class="pill">Про</span></td><td>Ашық</td><td>Жоқ</td><td><button class="btn ok">Доступ ашу</button> <button class="btn danger">Жабу</button></td></tr>
-            <tr><td>Bilim Hub</td><td>Алматы</td><td><span class="pill">Стандарт</span></td><td>Жабық</td><td>Иә</td><td><button class="btn ok">Доступ ашу</button> <button class="btn danger">Жабу</button></td></tr>
-          </tbody>
+          <tbody id="tenantRows"></tbody>
         </table>
       </div>
     </div>
   </div>
+
+  <script>
+    const SUPABASE_URL = 'https://sexswcmpqgtvsdvbqmkh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNleHN3Y21wcWd0dnNkdmJxbWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MTAyNzIsImV4cCI6MjA4NjM4NjI3Mn0.Bm59DEF7jJ_YmKfJO493XNffWLJDoQD7_CzPHyRvTgY';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let tenants = [];
+    let subscriptions = [];
+    let controls = [];
+
+    function notice(msg, type='ok'){
+      const el = document.getElementById('topNotice');
+      el.textContent = msg;
+      el.className = 'notice ' + type;
+      el.classList.remove('hidden');
+      setTimeout(()=>el.classList.add('hidden'), 2600);
+    }
+    function esc(v){ return String(v ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    async function loadData(){
+      const [tRes, sRes, cRes] = await Promise.all([
+        sb.from('tenants').select('*').order('created_at', {ascending:false}),
+        sb.from('subscriptions').select('*').order('created_at', {ascending:false}),
+        sb.from('owner_controls').select('*').order('opened_at', {ascending:false})
+      ]);
+      tenants = tRes.data || [];
+      subscriptions = sRes.data || [];
+      controls = cRes.data || [];
+
+      document.getElementById('editTenantId').innerHTML =
+        '<option value="">Орталық таңдаңыз</option>' +
+        tenants.map(t => `<option value="${t.id}">${esc(t.name)} — ${esc(t.city || '')}</option>`).join('');
+
+      renderKpis();
+      renderTenants();
+    }
+
+    function subForTenant(tenantId){
+      return subscriptions.find(x => x.tenant_id === tenantId) || null;
+    }
+
+    function renderKpis(){
+      document.getElementById('kpiCenters').textContent = tenants.length;
+      document.getElementById('kpiOpen').textContent = tenants.filter(x => x.status === 'active').length;
+      document.getElementById('kpiDemo').textContent = tenants.filter(x => x.demo_enabled).length;
+      document.getElementById('kpiPro').textContent = tenants.filter(x => ['pro','online'].includes(x.tariff_code)).length;
+    }
+
+    function renderTenants(){
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const tariffFilter = document.getElementById('filterTariff').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+
+      let rows = tenants.filter(t => {
+        const hit = [t.name, t.city, t.direction, t.tariff_code, t.status].join(' ').toLowerCase().includes(q);
+        const tariffOk = !tariffFilter || t.tariff_code === tariffFilter;
+        const statusOk = !statusFilter || t.status === statusFilter;
+        return hit && tariffOk && statusOk;
+      });
+
+      document.getElementById('tenantRows').innerHTML = rows.map(t => `
+        <tr>
+          <td><strong>${esc(t.name)}</strong></td>
+          <td>${esc(t.city || '')}</td>
+          <td>${esc(t.direction || '')}</td>
+          <td><span class="pill">${esc(t.tariff_code || 'demo')}</span></td>
+          <td>${t.status === 'active' ? '<span class="status-open">Ашық</span>' : '<span class="status-closed">' + esc(t.status || 'blocked') + '</span>'}</td>
+          <td>${t.demo_enabled ? 'Иә' : 'Жоқ'}</td>
+          <td>${t.online_enabled ? 'Иә' : 'Жоқ'}</td>
+          <td>${t.bank_payment_link ? `<a href="${esc(t.bank_payment_link)}" target="_blank">Ашу</a>` : '—'}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn secondary" onclick="selectTenant('${t.id}')">Таңдау</button>
+              <button class="btn ok" onclick="setTenantStatus('${t.id}','active')">Ашу</button>
+              <button class="btn danger" onclick="setTenantStatus('${t.id}','blocked')">Жабу</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="9">Орталық жоқ</td></tr>';
+    }
+
+    function selectTenant(id){
+      document.getElementById('editTenantId').value = id;
+      loadTenantIntoForm();
+    }
+
+    function loadTenantIntoForm(){
+      const id = document.getElementById('editTenantId').value;
+      const t = tenants.find(x => x.id === id);
+      if(!t) return;
+
+      document.getElementById('editName').value = t.name || '';
+      document.getElementById('editCity').value = t.city || '';
+      document.getElementById('editDirection').value = t.direction || '';
+      document.getElementById('editMainBranch').value = t.main_branch || '';
+      document.getElementById('editBankLink').value = t.bank_payment_link || '';
+      document.getElementById('editTariff').value = t.tariff_code || 'demo';
+      document.getElementById('editStatus').value = t.status || 'pending';
+      document.getElementById('editDemo').value = String(!!t.demo_enabled);
+      document.getElementById('editOnline').value = String(!!t.online_enabled);
+    }
+
+    async function saveTenantEdits(){
+      const id = document.getElementById('editTenantId').value;
+      if(!id) return notice('Алдымен орталық таңдаңыз', 'err');
+
+      const payload = {
+        name: document.getElementById('editName').value.trim(),
+        city: document.getElementById('editCity').value.trim(),
+        direction: document.getElementById('editDirection').value.trim(),
+        main_branch: document.getElementById('editMainBranch').value.trim(),
+        bank_payment_link: document.getElementById('editBankLink').value.trim(),
+        tariff_code: document.getElementById('editTariff').value,
+        tariff_mode: document.getElementById('editTariff').value,
+        status: document.getElementById('editStatus').value,
+        demo_enabled: document.getElementById('editDemo').value === 'true',
+        online_enabled: document.getElementById('editOnline').value === 'true',
+        updated_at: new Date().toISOString()
+      };
+
+      const upTenant = await sb.from('tenants').update(payload).eq('id', id);
+      if(upTenant.error) return notice(upTenant.error.message, 'err');
+
+      const sub = subForTenant(id);
+      if(sub){
+        const upSub = await sb.from('subscriptions').update({
+          tariff_code: payload.tariff_code,
+          status: payload.status === 'blocked' ? 'blocked' : 'active',
+          read_only_demo: payload.demo_enabled,
+          updated_at: new Date().toISOString()
+        }).eq('id', sub.id);
+        if(upSub.error) return notice(upSub.error.message, 'err');
+      } else {
+        const insSub = await sb.from('subscriptions').insert({
+          tenant_id: id,
+          tariff_code: payload.tariff_code,
+          status: payload.status === 'blocked' ? 'blocked' : 'active',
+          read_only_demo: payload.demo_enabled,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        if(insSub.error) return notice(insSub.error.message, 'err');
+      }
+
+      const ctrl = controls.find(x => x.tenant_id === id);
+      if(ctrl){
+        await sb.from('owner_controls').update({
+          opened: payload.status === 'active',
+          opened_at: new Date().toISOString(),
+          note: 'Owner update'
+        }).eq('id', ctrl.id);
+      } else {
+        await sb.from('owner_controls').insert({
+          tenant_id: id,
+          opened: payload.status === 'active',
+          opened_at: new Date().toISOString(),
+          note: 'Owner create'
+        });
+      }
+
+      await loadData();
+      notice('Орталық деректері сақталды');
+    }
+
+    async function setTenantStatus(id, status){
+      const res = await sb.from('tenants').update({
+        status,
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
+      if(res.error) return notice(res.error.message, 'err');
+
+      const sub = subForTenant(id);
+      if(sub){
+        await sb.from('subscriptions').update({
+          status: status === 'blocked' ? 'blocked' : 'active',
+          updated_at: new Date().toISOString()
+        }).eq('id', sub.id);
+      }
+
+      const ctrl = controls.find(x => x.tenant_id === id);
+      if(ctrl){
+        await sb.from('owner_controls').update({
+          opened: status === 'active',
+          opened_at: new Date().toISOString(),
+          note: status === 'active' ? 'Owner access opened' : 'Owner access closed'
+        }).eq('id', ctrl.id);
+      } else {
+        await sb.from('owner_controls').insert({
+          tenant_id: id,
+          opened: status === 'active',
+          opened_at: new Date().toISOString(),
+          note: status === 'active' ? 'Owner access opened' : 'Owner access closed'
+        });
+      }
+
+      await loadData();
+      notice(status === 'active' ? 'Доступ ашылды' : 'Доступ жабылды');
+    }
+
+    async function bulkSetStatus(status){
+      const id = document.getElementById('editTenantId').value;
+      if(!id) return notice('Таңдалған орталық жоқ', 'err');
+      await setTenantStatus(id, status);
+    }
+
+    async function bulkSetDemo(enabled){
+      const id = document.getElementById('editTenantId').value;
+      if(!id) return notice('Таңдалған орталық жоқ', 'err');
+
+      const tRes = await sb.from('tenants').update({
+        demo_enabled: !!enabled,
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
+      if(tRes.error) return notice(tRes.error.message, 'err');
+
+      const sub = subForTenant(id);
+      if(sub){
+        await sb.from('subscriptions').update({
+          read_only_demo: !!enabled,
+          updated_at: new Date().toISOString()
+        }).eq('id', sub.id);
+      }
+
+      await loadData();
+      notice(enabled ? 'Demo қосылды' : 'Demo өшірілді');
+    }
+
+    async function deleteTenant(){
+      const id = document.getElementById('editTenantId').value;
+      if(!id) return notice('Өшіру үшін орталық таңдаңыз', 'err');
+      const res = await sb.from('tenants').delete().eq('id', id);
+      if(res.error) return notice(res.error.message, 'err');
+      await loadData();
+      notice('Орталық өшірілді');
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
