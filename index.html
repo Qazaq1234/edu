@@ -2,47 +2,222 @@
 <html lang="kk">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="favicon.ico"><title>EdukZ Owner Live Refined</title>
+<link rel="icon" href="favicon.ico">
+<title>EdukZ Owner Premium</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#f4f7fb; --card:#fff; --line:#e7ebf3; --text:#0f172a; --muted:#64748b;--brand:#2563eb; --brand2:#4f46e5; --ok:#16a34a; --warn:#d97706; --danger:#dc2626;--shadow:0 14px 40px rgba(17,24,39,.08); --radius:22px;}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}.auth-shell{max-width:1240px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:18px}.card,.hero{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.hero{background:linear-gradient(135deg,#0f172a,#1d4ed8);color:#fff;padding:30px}.hero h1{font-size:38px;line-height:1.1;margin:0 0 10px}.hero p{margin:0;color:#dbeafe;font-size:18px;line-height:1.6}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.card{padding:20px}.input,.select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit}.btn{appearance:none;border:none;border-radius:14px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}.btn.secondary{background:#fff;border:1px solid var(--line)}.btn.ok{background:var(--ok);color:#fff}.btn.warn{background:var(--warn);color:#fff}.btn.danger{background:var(--danger);color:#fff}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:700}.notice{padding:12px 14px;border-radius:16px;background:#eff6ff;color:#1d4ed8;margin-bottom:12px}.notice.err{background:#fee2e2;color:#991b1b}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:11px;border-bottom:1px solid #edf2f7;text-align:left}th{font-size:12px;color:var(--muted);text-transform:uppercase;background:#fafcff}.kpi .label{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:800}.kpi .value{font-size:30px;font-weight:900;margin-top:8px}.status-ok{color:var(--ok);font-weight:800}.status-danger{color:var(--danger);font-weight:800}
+:root{--bg:#f4f7fb;--card:#fff;--line:#e7ebf3;--text:#0f172a;--muted:#64748b;--brand:#2563eb;--brand2:#4f46e5;--ok:#16a34a;--warn:#d97706;--danger:#dc2626;--shadow:0 18px 45px rgba(17,24,39,.08);--radius:22px}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);color:var(--text)}
+.wrap{max-width:1260px;margin:24px auto;padding:0 16px;display:grid;gap:18px} .card,.hero{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,#081225,#163b8c 55%,#3b82f6 100%);color:#fff;padding:30px}
+.hero h1{font-size:40px;line-height:1.05;margin:0 0 10px} .hero p{margin:0;color:#dbeafe;font-size:18px;line-height:1.6}
+.grid{display:grid;gap:16px} .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))} .g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{padding:20px} .input,.select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit}
+.btn{appearance:none;border:none;border-radius:14px;padding:11px 15px;font:inherit;font-weight:800;cursor:pointer}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff} .btn.secondary{background:#fff;border:1px solid var(--line)} .btn.ok{background:var(--ok);color:#fff} .btn.warn{background:var(--warn);color:#fff} .btn.danger{background:var(--danger);color:#fff}
+.notice{padding:12px 14px;border-radius:16px;background:#eff6ff;color:#1d4ed8} .notice.err{background:#fee2e2;color:#991b1b}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:700}
+.kpi .label{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:800} .kpi .value{font-size:30px;font-weight:900;margin-top:8px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px} table{width:100%;border-collapse:collapse;min-width:980px} th,td{padding:11px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top} th{font-size:12px;color:var(--muted);text-transform:uppercase;background:#fafcff}
+.status-ok{color:var(--ok);font-weight:800} .status-danger{color:var(--danger);font-weight:800} .muted{color:var(--muted)}
+@media (max-width:900px){.hero h1{font-size:34px}}
 </style>
 </head>
 <body>
-<div class="auth-shell">
-  <div class="hero"><h1>EdukZ Owner Portal</h1><p>Орталықтарды owner деңгейінде ашу, жабу, тариф беру және online режимді басқару панелі.</p></div>
-  <div id="topNotice" class="notice hidden" style="display:none"></div>
+<div class="wrap">
+  <div class="hero">
+    <h1>EdukZ Owner Portal</h1>
+    <p>Қарапайым owner панелі. Орталықтың атын, қазіргі тарифін, сұралған тарифін көресің. Қажет болса тарифті бекітесің, доступ ашасың не жабасың.</p>
+  </div>
+
+  <div id="topNotice" class="notice" style="display:none"></div>
+
   <div class="grid g4">
     <div class="card kpi"><div class="label">Орталық</div><div class="value" id="kpiCenters">0</div></div>
     <div class="card kpi"><div class="label">Ашық</div><div class="value" id="kpiOpen">0</div></div>
     <div class="card kpi"><div class="label">Жабық</div><div class="value" id="kpiClosed">0</div></div>
-    <div class="card kpi"><div class="label">Online</div><div class="value" id="kpiOnline">0</div></div>
+    <div class="card kpi"><div class="label">Сұраныс бар</div><div class="value" id="kpiRequested">0</div></div>
   </div>
-  <div class="card"><div class="grid g2"><input id="searchInput" class="input" placeholder="Іздеу: орталық, қала, тариф" oninput="renderTenants()"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><select id="filterTariff" class="select" onchange="renderTenants()"><option value="">Барлық тариф</option><option value="econom">Эконом</option><option value="standard">Стандарт</option><option value="pro">Про</option><option value="online">Онлайн</option></select><select id="filterStatus" class="select" onchange="renderTenants()"><option value="">Барлық статус</option><option value="active">Ашық</option><option value="pending">Pending</option><option value="blocked">Жабық</option></select></div></div></div>
-  <div class="grid g2">
-    <div class="card"><div style="font-size:22px;font-weight:900;margin-bottom:12px">Орталық редакторы</div><div class="grid g2"><select id="editTenantId" class="select" onchange="loadTenantIntoForm()"></select><input id="editName" class="input" placeholder="Орталық атауы"><input id="editCity" class="input" placeholder="Қала"><input id="editDirection" class="input" placeholder="Бағыты"><input id="editMainBranch" class="input" placeholder="Бас филиал"><input id="editBankLink" class="input" placeholder="Банк төлеміне ссылка"><select id="editTariff" class="select"><option value="econom">Эконом</option><option value="standard">Стандарт</option><option value="pro">Про</option><option value="online">Онлайн</option></select><select id="editStatus" class="select"><option value="active">Ашық</option><option value="pending">Pending</option><option value="blocked">Жабық</option></select><select id="editOnline" class="select"><option value="true">Online қосулы</option><option value="false">Online өшірулі</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="saveTenantEdits()">Сақтау</button><button class="btn danger" onclick="deleteTenant()">Өшіру</button></div></div>
-    <div class="card"><div style="font-size:22px;font-weight:900;margin-bottom:12px">Жылдам басқару</div><div class="grid g2"><button class="btn ok" onclick="bulkSetStatus('active')">Таңдалғанды ашу</button><button class="btn danger" onclick="bulkSetStatus('blocked')">Таңдалғанды жабу</button><button class="btn warn" onclick="bulkSetOnline(true)">Online қосу</button><button class="btn secondary" onclick="bulkSetOnline(false)">Online өшіру</button></div></div>
+
+  <div class="card">
+    <div class="grid g2">
+      <input id="searchInput" class="input" placeholder="Іздеу: орталық, қала, тариф" oninput="renderTenants()">
+      <div class="grid g2" style="gap:12px">
+        <select id="filterStatus" class="select" onchange="renderTenants()">
+          <option value="">Барлық статус</option>
+          <option value="active">Ашық</option>
+          <option value="pending">Pending</option>
+          <option value="blocked">Жабық</option>
+        </select>
+        <select id="filterRequest" class="select" onchange="renderTenants()">
+          <option value="">Барлық сұраныс</option>
+          <option value="requested">Сұралған</option>
+          <option value="approved">Бекітілген</option>
+          <option value="none">Жоқ</option>
+        </select>
+      </div>
+    </div>
   </div>
-  <div class="card"><div style="font-size:24px;font-weight:900;margin-bottom:12px">Орталықтар бақылау</div><div class="table-wrap"><table><thead><tr><th>Орталық</th><th>Қала</th><th>Бағыт</th><th>Тариф</th><th>Статус</th><th>Online</th><th>Банк ссылка</th><th>Әрекет</th></tr></thead><tbody id="tenantRows"></tbody></table></div></div>
+
+  <div class="card">
+    <div style="font-size:24px;font-weight:900;margin-bottom:12px">Орталықтар</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Орталық</th>
+            <th>Қала</th>
+            <th>Белсенді тариф</th>
+            <th>Сұралған тариф</th>
+            <th>Owner статус</th>
+            <th>Online</th>
+            <th>Әрекет</th>
+          </tr>
+        </thead>
+        <tbody id="tenantRows"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
 <script>
-const SUPABASE_URL = 'https://vlcnhytqhhikznddryzt.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsY25oeXRxaGhpa3puZGRyeXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY0MzcsImV4cCI6MjA5MDEwMjQzN30.U0twGnjxKm0ja5c2P8p-NoePH_hq9Rsq8xqbRh4l9EM';
+const SUPABASE_URL = "https://vlcnhytqhhikznddryzt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsY25oeXRxaGhpa3puZGRyeXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY0MzcsImV4cCI6MjA5MDEwMjQzN30.U0twGnjxKm0ja5c2P8p-NoePH_hq9Rsq8xqbRh4l9EM";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const esc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let tenants=[],subscriptions=[],controls=[];
-function notice(msg,type='ok'){const el=document.getElementById('topNotice');el.textContent=msg;el.className='notice '+type;el.style.display='block';setTimeout(()=>el.style.display='none',2500)}
-async function loadData(){const [tRes,sRes,cRes]=await Promise.all([sb.from('tenants').select('*').order('created_at',{ascending:false}),sb.from('subscriptions').select('*').order('created_at',{ascending:false}),sb.from('owner_controls').select('*').order('opened_at',{ascending:false})]);tenants=tRes.data||[];subscriptions=sRes.data||[];controls=cRes.data||[];document.getElementById('editTenantId').innerHTML='<option value="">Орталық таңдаңыз</option>'+tenants.map(t=>`<option value="${t.id}">${esc(t.name)} — ${esc(t.city||'')}</option>`).join('');renderKpis();renderTenants();}
+function notice(msg,type='ok'){const el=document.getElementById('topNotice');el.textContent=msg;el.className='notice '+type;el.style.display='block';setTimeout(()=>el.style.display='none',2600)}
 function subForTenant(id){return subscriptions.find(x=>x.tenant_id===id)||null}
-function renderKpis(){document.getElementById('kpiCenters').textContent=tenants.length;document.getElementById('kpiOpen').textContent=tenants.filter(x=>x.status==='active').length;document.getElementById('kpiClosed').textContent=tenants.filter(x=>x.status==='blocked').length;document.getElementById('kpiOnline').textContent=tenants.filter(x=>x.online_enabled).length}
-function renderTenants(){const q=document.getElementById('searchInput').value.trim().toLowerCase();const tariff=document.getElementById('filterTariff').value;const status=document.getElementById('filterStatus').value;const rows=tenants.filter(t=>[t.name,t.city,t.direction,t.tariff_code,t.status].join(' ').toLowerCase().includes(q)&&(!tariff||t.tariff_code===tariff)&&(!status||t.status===status));document.getElementById('tenantRows').innerHTML=rows.map(t=>`<tr><td><strong>${esc(t.name)}</strong></td><td>${esc(t.city||'')}</td><td>${esc(t.direction||'')}</td><td><span class="pill">${esc(t.tariff_code||'')}</span></td><td>${t.status==='active'?'<span class="status-ok">Ашық</span>':'<span class="status-danger">'+esc(t.status||'blocked')+'</span>'}</td><td>${t.online_enabled?'Иә':'Жоқ'}</td><td>${t.bank_payment_link?`<a href="${esc(t.bank_payment_link)}" target="_blank">Ашу</a>`:'—'}</td><td><button class="btn secondary" onclick="selectTenant('${t.id}')">Таңдау</button> <button class="btn ok" onclick="setTenantStatus('${t.id}','active')">Ашу</button> <button class="btn danger" onclick="setTenantStatus('${t.id}','blocked')">Жабу</button></td></tr>`).join('')||'<tr><td colspan="8">Орталық жоқ</td></tr>'}
-function selectTenant(id){document.getElementById('editTenantId').value=id;loadTenantIntoForm()}
-function loadTenantIntoForm(){const id=document.getElementById('editTenantId').value;const t=tenants.find(x=>x.id===id);if(!t)return;editName.value=t.name||'';editCity.value=t.city||'';editDirection.value=t.direction||'';editMainBranch.value=t.main_branch||'';editBankLink.value=t.bank_payment_link||'';editTariff.value=t.tariff_code||'econom';editStatus.value=t.status||'pending';editOnline.value=String(!!t.online_enabled)}
-async function saveTenantEdits(){const id=editTenantId.value;if(!id)return notice('Алдымен орталық таңдаңыз','err');const payload={name:editName.value.trim(),city:editCity.value.trim(),direction:editDirection.value.trim(),main_branch:editMainBranch.value.trim(),bank_payment_link:editBankLink.value.trim(),tariff_code:editTariff.value,tariff_mode:editTariff.value,status:editStatus.value,online_enabled:editOnline.value==='true',demo_enabled:false,updated_at:new Date().toISOString()};const up=await sb.from('tenants').update(payload).eq('id',id);if(up.error)return notice(up.error.message,'err');const sub=subForTenant(id);if(sub)await sb.from('subscriptions').update({tariff_code:payload.tariff_code,status:payload.status==='blocked'?'blocked':'active',read_only_demo:false,updated_at:new Date().toISOString()}).eq('id',sub.id);else await sb.from('subscriptions').insert({tenant_id:id,tariff_code:payload.tariff_code,status:payload.status==='blocked'?'blocked':'active',read_only_demo:false,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});await loadData();notice('Орталық сақталды')}
-async function setTenantStatus(id,status){const res=await sb.from('tenants').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(res.error)return notice(res.error.message,'err');const sub=subForTenant(id);if(sub)await sb.from('subscriptions').update({status:status==='blocked'?'blocked':'active',updated_at:new Date().toISOString()}).eq('id',sub.id);await loadData();notice(status==='active'?'Доступ ашылды':'Доступ жабылды')}
-async function bulkSetStatus(status){const id=editTenantId.value;if(!id)return notice('Таңдалған орталық жоқ','err');await setTenantStatus(id,status)}
-async function bulkSetOnline(enabled){const id=editTenantId.value;if(!id)return notice('Таңдалған орталық жоқ','err');const res=await sb.from('tenants').update({online_enabled:!!enabled,updated_at:new Date().toISOString()}).eq('id',id);if(res.error)return notice(res.error.message,'err');await loadData();notice(enabled?'Online қосылды':'Online өшірілді')}
-async function deleteTenant(){const id=editTenantId.value;if(!id)return notice('Өшіру үшін орталық таңдаңыз','err');const res=await sb.from('tenants').delete().eq('id',id);if(res.error)return notice(res.error.message,'err');await loadData();notice('Орталық өшірілді')}
+function ctrlForTenant(id){return controls.find(x=>x.tenant_id===id)||null}
+
+async function loadData(){
+  const [tRes,sRes,cRes] = await Promise.all([
+    sb.from('tenants').select('*').order('created_at',{ascending:false}),
+    sb.from('subscriptions').select('*').order('created_at',{ascending:false}),
+    sb.from('owner_controls').select('*').order('opened_at',{ascending:false})
+  ]);
+  tenants=tRes.data||[]; subscriptions=sRes.data||[]; controls=cRes.data||[];
+  renderKpis(); renderTenants();
+}
+
+function renderKpis(){
+  document.getElementById('kpiCenters').textContent=tenants.length;
+  document.getElementById('kpiOpen').textContent=tenants.filter(x=>x.status==='active').length;
+  document.getElementById('kpiClosed').textContent=tenants.filter(x=>x.status==='blocked').length;
+  document.getElementById('kpiRequested').textContent=subscriptions.filter(x=>(x.request_status||'none')==='requested').length;
+}
+
+function renderTenants(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const statusFilter=document.getElementById('filterStatus').value;
+  const requestFilter=document.getElementById('filterRequest').value;
+  const rows=tenants.filter(t=>{
+    const s=subForTenant(t.id);
+    const req=s?.request_status||'none';
+    return [t.name,t.city,t.tariff_code,s?.requested_tariff||'',req].join(' ').toLowerCase().includes(q)
+      && (!statusFilter || t.status===statusFilter)
+      && (!requestFilter || req===requestFilter);
+  });
+  document.getElementById('tenantRows').innerHTML = rows.map(t=>{
+    const s=subForTenant(t.id)||{};
+    const c=ctrlForTenant(t.id)||{opened:false};
+    const reqTariff=s.requested_tariff||t.tariff_code||'econom';
+    const reqStatus=s.request_status||'none';
+    return `<tr>
+      <td><strong>${esc(t.name)}</strong><div class="muted" style="margin-top:4px">${esc(t.direction||'')}</div></td>
+      <td>${esc(t.city||'')}</td>
+      <td><span class="pill">${esc(s.tariff_code||t.tariff_code||'econom')}</span></td>
+      <td><span class="pill">${esc(reqTariff)}</span><div class="muted" style="margin-top:6px">status: ${esc(reqStatus)}</div></td>
+      <td>${c.opened ? '<span class="status-ok">Ашық</span>' : '<span class="status-danger">Жабық</span>'}</td>
+      <td>${t.online_enabled ? 'Қосулы' : 'Өшірулі'}</td>
+      <td>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" onclick="approveTariff('${t.id}')">Тарифті бекіту</button>
+          <button class="btn ok" onclick="openCenter('${t.id}')">Ашу</button>
+          <button class="btn danger" onclick="closeCenter('${t.id}')">Жабу</button>
+          <button class="btn secondary" onclick="toggleOnline('${t.id}', ${!t.online_enabled})">${t.online_enabled ? 'Online өшіру' : 'Online қосу'}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7">Орталық жоқ</td></tr>';
+}
+
+async function approveTariff(tenantId){
+  const s=subForTenant(tenantId);
+  const requested=s?.requested_tariff || s?.tariff_code || 'econom';
+  if(s){
+    const res = await sb.from('subscriptions').update({
+      tariff_code: requested,
+      request_status: 'approved',
+      read_only_demo: false,
+      updated_at: new Date().toISOString()
+    }).eq('id', s.id);
+    if(res.error) return notice(res.error.message,'err');
+  } else {
+    const res = await sb.from('subscriptions').insert({
+      tenant_id: tenantId,
+      tariff_code: requested,
+      requested_tariff: requested,
+      request_status: 'approved',
+      status: 'active',
+      read_only_demo: false
+    });
+    if(res.error) return notice(res.error.message,'err');
+  }
+  const up = await sb.from('tenants').update({
+    tariff_code: requested,
+    tariff_mode: requested,
+    demo_enabled: false,
+    updated_at: new Date().toISOString()
+  }).eq('id', tenantId);
+  if(up.error) return notice(up.error.message,'err');
+  await loadData();
+  notice('Тариф бекітілді');
+}
+
+async function ensureOwnerControl(tenantId, opened){
+  const c = ctrlForTenant(tenantId);
+  if(c){
+    return sb.from('owner_controls').update({
+      opened,
+      opened_at: opened ? new Date().toISOString() : c.opened_at,
+      note: opened ? 'Owner ашты' : 'Owner жапты'
+    }).eq('id', c.id);
+  }
+  return sb.from('owner_controls').insert({
+    tenant_id: tenantId,
+    opened,
+    opened_at: opened ? new Date().toISOString() : null,
+    note: opened ? 'Owner ашты' : 'Owner жапты'
+  });
+}
+
+async function openCenter(tenantId){
+  const t = await sb.from('tenants').update({status:'active',updated_at:new Date().toISOString()}).eq('id',tenantId);
+  if(t.error) return notice(t.error.message,'err');
+  const c = await ensureOwnerControl(tenantId,true);
+  if(c.error) return notice(c.error.message,'err');
+  await loadData();
+  notice('Орталыққа доступ ашылды');
+}
+
+async function closeCenter(tenantId){
+  const t = await sb.from('tenants').update({status:'blocked',updated_at:new Date().toISOString()}).eq('id',tenantId);
+  if(t.error) return notice(t.error.message,'err');
+  const c = await ensureOwnerControl(tenantId,false);
+  if(c.error) return notice(c.error.message,'err');
+  await loadData();
+  notice('Орталыққа доступ жабылды');
+}
+
+async function toggleOnline(tenantId, enabled){
+  const res = await sb.from('tenants').update({online_enabled:enabled,updated_at:new Date().toISOString()}).eq('id',tenantId);
+  if(res.error) return notice(res.error.message,'err');
+  await loadData();
+  notice(enabled ? 'Online қосылды' : 'Online өшірілді');
+}
+
 loadData();
 </script>
-</body></html>
+</body>
+</html>
